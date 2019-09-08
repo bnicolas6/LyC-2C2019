@@ -1,0 +1,62 @@
+S --> D P
+D --> var_ini SDS var_fin
+SDS --> SDS SD 
+SDS --> SD 
+SD --> cor_a TDS cor_c var_asig cor_a VS cor_c punto_coma
+TDS --> TDS separador int
+TDS --> TDS separador float 
+TDS --> TDS separador string 
+TDS --> int|float|string
+VS --> VS separador id
+VS --> id 
+P --> llave_a SENS llave_c 
+SENS --> SENS SEN
+SENS --> SEN 
+SEN --> ASIG
+SEN --> CICLO 
+SEN --> DEC
+SEN --> ESC 
+SEN --> LEC 
+ASIG --> id op_asig EXP punto_coma 
+ASIG --> id op_asig cte_string punto_coma
+CICLO --> op_ciclo_ini llave_a SENS llave_c op_ciclo_fin par_a COND par_c punto_coma
+DEC --> op_decision PAR_AB COND PAR_CE llave_a SENS llave_c
+DEC --> op_decision PAR_AB COND PAR_CE llave_a SENS llave_c op_dec_neg llave_a SENS llave_c
+ESC --> op_esc id punto coma
+ESC --> op_esc cte_real punto coma
+ESC --> op_esc cte_int punto coma
+ESC --> op_esc cte_string punto coma
+LEC --> op_lec id punto_coma
+EXP --> EXP mas TER
+EXP --> EXP menos TER 
+EXP --> TER 
+TER --> TER mult FAC 
+TER --> TER divi FAC 
+TER --> FAC 
+FAC --> par_a EXP par_c
+FAC --> cte_int
+FAC --> cte_real
+FAC --> id
+FAC --> FIL 
+FIL --> filter par_a CONDF separador corchete_a VS corchete_c par_c
+COND --> COMP op_and COMP
+COND --> COMP op_or COMP
+COMP --> EXP CP EXP 
+COMP --> op_not par_a EXP CP EXP par_c
+COMP --> IN 
+CP --> >|<|>=|<=|!=|==
+IN --> inlist par_a id punto_coma corchete_a LEXP corchete_c par_c
+LEXP --> LEXP punto_coma EXP 
+LEXP --> EXP 
+CONDF --> COMPF op_and COMPF
+CONDF --> COMPF op_or COMPF
+COMPF --> guion_bajo CP EXP 
+COMPF --> op_not par_a guion_bajo CP EXP par_c
+COMPF --> EXP CP guion_bajo
+COMPF --> op_not par_a EXP CP guion_bajo par_c
+PAR_AB --> par_a PAR_AB
+PAR_AB --> par_a
+PAR_CE --> par_c PAR_CE
+PAR_CE --> par_c
+
+
