@@ -1,0 +1,55 @@
+TOKEN			LEXEMA			EXPRESIÓN REGULAR
+op_ciclo_ini		REPEAT			REPEAT|repeat
+op_decision		IF			IF|if
+op_asig			=			=
+cte_int			3; 20; -115...		
+cte_real		51,23; 325,11...
+cte_string		"Hola"; "mundo"		
+op_esc			PRINT			PRINT|print
+op_lec			READ			READ|read
+op_mayor		>			>
+op_menor		<			<
+op_mayor_igual		>=			>=
+op_menor_igual		<=			<=
+op_igual		==			==
+op_distinto		!=			!=
+op_and			&&			&&
+op_or			||			||
+op_not			!			!
+par_a			(			(
+par_c			)			)
+llave_a			{			{
+llave_c			}			}
+corchete_a		[			[
+corchete_c		]			]
+var_ini			VAR			VAR|var
+var_fin			ENDVAR			ENDVAR|endvar
+var_asig		:			:
+punto_coma		;			;
+separador		,			,
+id			a; b; var1		(letra)(letra|digito)*
+int			INT			INT|int
+float			FLOAT			FLOAT|float
+string			STRING			STRING|string
+op_ciclo_fin		UNTIL			UNTIL|until
+filter			FILTER			FILTER|filter
+inlist			INLIST			INLIST|inlist
+mas			+			+
+menos			-			-
+mult			*			*
+dividir			/			/
+guion_bajo		_			_
+op_dec_neg		ELSE			ELSE|else	
+
+
+
+
+
+
+
+
+
+
+
+
+
