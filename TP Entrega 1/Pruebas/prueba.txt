@@ -1,0 +1,113 @@
+/******DECLARACIONES*******/
+/---------------------------OK--------------------------------*/
+VAR
+	[int, float, string] : [edad, peso, nombre];
+ENDVAR
+
+VAR
+	[int, float, string] : [edad, peso, nombre];
+	[string, float, float] : [Materia, nota1, nota2];
+ENDVAR
+
+/*-------------------------ERROR--------------------------------*/
+
+/* Error de sintaxis */
+VAR
+	[int, float, string] : [edad, peso, nombre]
+	[string, float, float] : [Materia, nota1, nota2];
+ENDVAR
+
+/* Error de sintaxis */
+VAR
+	[int, float; string] : [edad, peso, nombre];
+	[string, float, float] ; [Materia, nota1, nota2];
+ENDVAR
+
+/* Error - Conflicto número de variables */
+VAR
+	[int, float, string, int] : [edad, peso, nombre];
+ENDVAR
+
+/* Error - Conflicto número de variables */
+VAR
+	[int, float, string] : [edad, peso, nombre, apellido];
+ENDVAR
+
+/********ITERACIONES************/
+/*--------------------------OK--------------------------------- */
+if (a > b && c < d)
+{
+	b = 5;
+}
+
+/*------------------------ERROR--------------------------------*/
+
+/* Error! - Declaración no permitida */
+if(a == b)
+{
+	if(edad == 3)
+	{
+		VAR
+			[int, float, string] : [edad, peso, nombre];
+		ENDVAR
+	}
+}
+
+/* Error! - Conflicto de tipos de variables*/
+if(a == b || )
+{
+	if(edad == "nueve")
+	{
+		PRINT ("Hola mundo");
+	}
+}
+
+/* Error! - Conflicto cantidad de condiciones  */
+if (a > b && c < d && b != d)
+{
+	b = 5;
+}
+
+/* Error! - Formato de impresión */
+if (a > b && c < d)
+{
+	PRINT ("Hola mundo""");
+}
+
+/* Revisar */
+if (!(a > b && c < d))
+{
+	PRINT ("Hola mundo");
+}
+
+/* Revisar */
+if ((a > b) && (c < d))
+{
+	PRINT ("Hola mundo");
+}
+
+/* Revisar */
+if (!(a > b) && !(c < d))
+{
+	PRINT ("Hola mundo");
+}
+
+
+if(((a>b)))
+{
+	c = a+b;
+}
+
+if(((a>b)))
+{
+	c = (((a+b)));
+}
+
+
+
+
+
+
+
+
+
