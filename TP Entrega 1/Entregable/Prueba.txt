@@ -1,0 +1,6 @@
+VAR
+	[int, float, int] : [edad, peso, nombre];
+ENDVAR
+{
+	edad = 15 ;
+}
