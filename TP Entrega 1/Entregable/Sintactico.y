@@ -77,7 +77,6 @@ termino :   termino OP_MULT factor
 factor :    ID
           | CTE_INT
           | CTE_REAL
-          | CTE_STRING
           | filter
           | PAR_A expresion PAR_C
           ;
@@ -96,7 +95,8 @@ sentencia :   asignacion
             ;
 
 
-asignacion : ID OP_ASIG expresion PUNTO_COMA ;
+asignacion :   ID OP_ASIG expresion PUNTO_COMA
+             | ID OP_ASIG CTE_STRING PUNTO_COMA;
 
 
 ciclo : REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA ;
