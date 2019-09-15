@@ -169,6 +169,7 @@ int main(int argc,char *argv[])
   else
   {
 	yyparse();
+  guardarRenglonesEnTS();
   }
   fclose(yyin);
   return 0;

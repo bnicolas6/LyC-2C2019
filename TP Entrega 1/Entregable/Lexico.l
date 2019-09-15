@@ -4,6 +4,7 @@
 #include <conio.h>
 #include <string.h>
 #include <float.h>
+#include <math.h>
 #include <limits.h>
 #include "y.tab.h"
 FILE  *yyin;
@@ -27,8 +28,8 @@ int validarCteReal(float flotante);
 int validarCteString(char *str);
 
 int insertarCteIntEnTS(int entero);
-int insertarCteRealEnTS(char *str);
-int insertarCteStringEnTS(float flotante);
+int insertarCteRealEnTS(float flotante);
+int insertarCteStringEnTS(char *str);
 int insertarIDEnTS(char *id);
 
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud);
@@ -103,7 +104,7 @@ ID				{LETRA}({LETRA}|{DIGITO})*
 {ID} 			{ yylval.strVal = strdup(yytext); insertarIDEnTS(yylval.strVal); return ID; }
 {CTE_INT}		{ yylval.intVal = atoi(yytext); validarCteInt(yylval.intVal); insertarCteIntEnTS(yylval.intVal); return CTE_INT; }
 {CTE_REAL}		{ yylval.realVal = atof(yytext); validarCteReal(yylval.realVal); insertarCteRealEnTS(yylval.realVal); return CTE_REAL; }
-{CTE_STRING}	{ yylval.strVal = strdup(yytext); validarString(yylval.strVal); insertarCteStringEnTS(yylval.strVal); return CTE_STRING; }
+{CTE_STRING}	{ yylval.strVal = strdup(yytext); validarCteString(yylval.strVal); insertarCteStringEnTS(yylval.strVal); return CTE_STRING; }
 " "
 "\t"
 "\n"
@@ -125,7 +126,7 @@ int validarCteInt(int entero)
 
 int validarCteReal(float flotante)
 {
-	if(real < pow(3.4, -38) || real > pow(3.4, 38))
+	if(flotante < pow(3.4, -38) || flotante > pow(3.4, 38))
 	{
 		printf("(!) ERROR: Constante real fuera de rango (32 bits maximo) -> Linea %d\n", yylineno);
 		fprintf(stderr, "Fin de ejecucion.\n");
@@ -161,7 +162,7 @@ int insertarCteIntEnTS(int entero)
 	return 1;
 }
 
-int insertarCteRealEnTS(char *str)
+int insertarCteRealEnTS(float flotante)
 {
 	char *valor = (char*) malloc(sizeof(float));
 	snprintf(valor, sizeof(float), "%f", flotante);
@@ -175,7 +176,7 @@ int insertarCteRealEnTS(char *str)
 	return 1;
 }
 
-int insertarCteStringEnTS(float flotante)
+int insertarCteStringEnTS(char *str)
 {
 	char *nombre = (char*) malloc(31 * sizeof(char));
 	*nombre = '\0';
@@ -199,6 +200,7 @@ void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud)
 {
 	if (noExisteEnTS(nombre))
 	{
+		//printf("INSERTANDO: ********** | %s | %s | %s | %s | **********\n", nombre, tipo, valor, longitud);
 		struct renglonTS renglon;
 		
 		renglon.nombre = nombre;
