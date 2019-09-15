@@ -44,6 +44,11 @@ void guardarRenglonesEnTS();
 DIGITO			[0-9]
 LETRA			[a-zA-Z]
 CARACTER        [a-z|A-Z|0-9|=|>|<|!|:|+|-|*|/|?|¿|!|¡|@|%|#|&|°|´|^|`|~|/|\\|-|_|.|,|;|¬||]
+CARACTER_C      [a-z|A-Z|ñÑáéíóúÁÉÍÓÚ\s|0-9|=|>|<|!|:|+|-|*|/|?|¿|!|¡|@|%|#|&|°|´|^|`|~|/|\\|-|_|.|,|;|¬||]
+SEC_ESCAPE      [ \t\n\r]
+STRING_VAL      ({CARACTER_C}+|{SEC_ESCAPE})*
+SUB_COMENT      --\/{STRING_VAL}\/--
+COMENTARIO      ({SUB_COMENT}|--\/{STRING_VAL}{SUB_COMENT}{STRING_VAL}\/--)+
 CTE_STRING      "{CARACTER}*"
 CTE_REAL        {DIGITO}+"."{DIGITO}*
 CTE_INT         {DIGITO}+
@@ -108,6 +113,7 @@ ID				{LETRA}({LETRA}|{DIGITO})*
 " "
 "\t"
 "\n"
+{COMENTARIO} 
 %%
 
 /* FUNCIONES */
