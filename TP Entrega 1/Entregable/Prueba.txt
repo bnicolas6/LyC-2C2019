@@ -3,8 +3,19 @@
 	palabras reservadas VAR y ENDVAR /--
 VAR
 	[int, float, int] : [edad, peso, nombre];
+	[int, int, int] : [v1, v2, v3];
 ENDVAR
 --/ Así son los comentarios en el 2°Cuat de LyC --/ Año 2019 /-- /--
 {
-	edad = 15 ;   --/ asignación variable entera /--
+	edad = 20; --/ asignación variable entera /--
+	if (((edad * 1) - 1) == 19 )
+	{
+		peso = 15;  
+		read edad ;
+	}
+	else 
+	{
+		peso = 16;
+		print peso;
+	}
 }
