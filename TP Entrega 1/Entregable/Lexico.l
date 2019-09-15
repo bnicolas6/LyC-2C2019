@@ -65,7 +65,6 @@ FLOAT			(FLOAT|float)
 STRING 			(STRING|string)
 FILTER			(FILTER|filter)
 INLIST			(INLIST|inlist)
-COMENTARIO 		--/({CARACTER}*|--/{CARACTER}*/--)/--
 ID				{LETRA}({LETRA}|{DIGITO})*
 
 %%
