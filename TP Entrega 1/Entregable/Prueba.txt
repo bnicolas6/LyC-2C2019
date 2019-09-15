@@ -17,5 +17,7 @@ ENDVAR
 	{
 		peso = 16;
 		print peso;
+		nombre = "Juan";
+		print "Otro nombre";
 	}
 }
