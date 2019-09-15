@@ -87,11 +87,11 @@ lista_sentencia :  lista_sentencia sentencia
                   ;
 
 
-sentencia :   asignacion
-            | ciclo
-            | decision
-            | escritura
-            | lectura
+sentencia :   asignacion	{ printf("Asignación OK\n"); }
+            | ciclo		{ printf("Ciclo OK\n"); }
+            | decision		{ printf("Decisión OK\n"); }
+            | escritura		{ printf("Escritura OK\n"); }
+            | lectura		{ printf("Lectura OK\n"); }
             ;
 
 
@@ -103,7 +103,7 @@ ciclo : REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C
 
 
 decision :   IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C
-           | IF PAR_A lista_condicion PAR_A LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+           | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
            ;
 
 escritura :   OP_ESC ID PUNTO_COMA
