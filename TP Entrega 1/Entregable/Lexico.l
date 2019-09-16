@@ -36,6 +36,8 @@ void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud);
 int noExisteEnTS(char * nombre);
 void guardarRenglonesEnTS();
 
+void guardarTipos(int variableActual, char listaVariables[][20], char tipoActual[]);
+
 %}
 
 %option noyywrap
@@ -224,9 +226,9 @@ int noExisteEnTS(char * nombre)
 	for(i = 0; i < cantRenglonesTS; i++)
 	{
 		if (strcmpi(nombre, tablaSimbolos[i].nombre) == 0)
-			return -1;
+			return i;
 	}
-	return 1;
+	return -1;
 }
 
 void guardarRenglonesEnTS()
@@ -246,4 +248,17 @@ void guardarRenglonesEnTS()
 		}		
 		fclose(file);
 	}
+}
+
+void guardarTipos(int variableActual, char listaVariables[][20], char tipoActual[]){
+  int i;
+  for(i=0; i<variableActual; i++){
+    int pos=noExisteEnTS(listaVariables[i]);
+    if(pos!=-1) {
+	  char *tipoDato = (char*) malloc(10*sizeof(char));
+	  *tipoDato = '\0';
+	  strcat(tipoDato, tipoActual);
+	  tablaSimbolos[pos].tipo = tipoDato;
+	}
+  }
 }
