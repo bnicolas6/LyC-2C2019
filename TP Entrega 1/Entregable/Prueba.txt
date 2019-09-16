@@ -10,10 +10,10 @@ ENDVAR
 	edad = 20; --/ asignación variable entera /--
 	if (((edad * 1) - 1) == 19 )
 	{
-		peso = 15;  
+		peso = 15;
 		read edad ;
 	}
-	else 
+	else
 	{
 		peso = 16;
 		print peso;
@@ -38,4 +38,9 @@ ENDVAR
 			UNTIL(a <= 5 * ((3 + 4) / 2));
 			}
 	}
+
+	v4 = filter (_<(peso+5) && _>(edad*2) , [v1, v2, v3] );
+	v5 = edad + filter (_<(peso+5) && _>(edad*2) , [v1, v2, v3] );
+	v5 = edad + filter (_<(peso+5) && _>(edad*2) , [v1, v2, nombre] );
+
 }

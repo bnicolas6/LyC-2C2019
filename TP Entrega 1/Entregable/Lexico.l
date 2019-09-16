@@ -132,15 +132,15 @@ ID				{LETRA}({LETRA}|{DIGITO})*
 {CTE_REAL}		{ yylval.realVal = atof(yytext); validarCteReal(yylval.realVal); insertarCteRealEnTS(yylval.realVal); return CTE_REAL; }
 {CTE_STRING}	{ yylval.strVal = strdup(yytext);
  				  yylval.strVal = yylval.strVal + 1;
-				  yylval.strVal[strlen(yylval.strVal)-1] = '\0';  
-				  validarCteString(yylval.strVal);		 
-				  insertarCteStringEnTS(yylval.strVal); 
-				  return CTE_STRING; 
+				  yylval.strVal[strlen(yylval.strVal)-1] = '\0';
+				  validarCteString(yylval.strVal);
+				  insertarCteStringEnTS(yylval.strVal);
+				  return CTE_STRING;
 				}
 " "
 "\t"
 "\n"
-{COMENTARIO} 
+{COMENTARIO}
 %%
 
 /* FUNCIONES */
@@ -190,7 +190,7 @@ int insertarCteIntEnTS(int entero)
 	*nombre = '\0';
 	strcat(nombre, "_");
 	strcat(nombre, valor);
-	
+
 	insertarEnTS(nombre, "CTE_INT", valor, "-");
 	return 1;
 }
@@ -204,7 +204,7 @@ int insertarCteRealEnTS(float flotante)
 	*nombre = '\0';
 	strcat(nombre, "_");
 	strcat(nombre, valor);
-	
+
 	insertarEnTS(nombre, "CTE_REAL", valor, "-");
 	return 1;
 }
@@ -215,8 +215,8 @@ int insertarCteStringEnTS(char *str)
 	*nombre = '\0';
 	strcat(nombre, "_");
 	strcat(nombre, str);
-	
-	char *longitud = (char*) malloc(10 * sizeof(char));	
+
+	char *longitud = (char*) malloc(10 * sizeof(char));
 	itoa(strlen(str), longitud, 10);
 
 	insertarEnTS(nombre, "CTE_STRING", str, longitud);
@@ -225,15 +225,15 @@ int insertarCteStringEnTS(char *str)
 
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud)
 {
-	if (noExisteEnTS(nombre))
+	if (noExisteEnTS(nombre)==-1)
 	{
 		struct renglonTS renglon;
-		
+
 		renglon.nombre = nombre;
 		renglon.tipo = tipo;
 		renglon.valor = valor;
 		renglon.longitud = longitud;
-		
+
 		tablaSimbolos[cantRenglonesTS] = renglon;
 		cantRenglonesTS++;
 	}
@@ -245,26 +245,26 @@ int noExisteEnTS(char * nombre)
 	for(i = 0; i < cantRenglonesTS; i++)
 	{
 		if (strcmpi(nombre, tablaSimbolos[i].nombre) == 0)
-			return -1;
+			return i;
 	}
-	return 1;
+	return -1;
 }
 
 void guardarRenglonesEnTS()
 {
 	FILE * file = fopen("ts.txt", "a");
-	
-	if(file == NULL) 
+
+	if(file == NULL)
 	{
     	printf("(!) ERROR: No se pudo abrir el txt correspondiente a la tabla de simbolos\n");
 	}
-	else 
+	else
 	{
 		int i = 0;
-		for (i; i < cantRenglonesTS; i++) 
+		for (i; i < cantRenglonesTS; i++)
 		{
 			fprintf(file, "%s\t%s\t%s\t%s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo, tablaSimbolos[i].valor, tablaSimbolos[i].longitud);
-		}		
+		}
 		fclose(file);
 	}
 }
@@ -277,7 +277,6 @@ void sector_declaracion_Id_reiniciar(){
 		sd_contador_TipoDato = 0;
 		sd_procesando_tipoDato = 1;
 	}
-	
 }
 
 void sector_declaracion_tipoDato_reiniciar(){
@@ -293,7 +292,7 @@ char *getNombre_tipoDato(int tipoDato){
 			return "FLOAT";
 		default:
 			return "STRING";
-	}	
+	}
 }
 
 void sector_declaracion_almacenar_tipoDato(int tipoDato){
@@ -320,5 +319,5 @@ int filter_validarTipoVariable(char *variable){
 					exit (1);
 				}
 			}
-		}		
+	}
 }

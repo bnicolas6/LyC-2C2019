@@ -9,6 +9,10 @@
 FILE  *yyin;
 char *yyltext;
 char *yytext;
+char tipoActual[10]={""};
+char listaVariables[10][20]={""};
+int variableActual=0;
+void reinicioVariables();
 %}
 
 %union {
@@ -84,7 +88,6 @@ factor :    ID
 lista_sentencia :  lista_sentencia sentencia
                   | sentencia
                   ;
-
 
 sentencia :   asignacion { printf("  *** asignacion - OK ***\n"); }
             | ciclo { printf("  *** ciclo - OK ***\n"); }
