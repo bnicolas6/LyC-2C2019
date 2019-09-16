@@ -21,6 +21,16 @@ struct renglonTS {
 struct renglonTS tablaSimbolos[100];
 int cantRenglonesTS =0;
 
+int sd_array_TipoDato[100];
+int sd_contador_TipoDato  = 0;
+int sd_contador_Id;
+int sd_procesando;
+int sd_procesando_tipoDato = 0;
+
+int tipoInt = 1;
+int tipoFloat = 2;
+int tipoString = 3;
+
 /* FUNCIONES */
 
 int validarCteInt(int entero);
@@ -33,8 +43,20 @@ int insertarCteStringEnTS(char *str);
 int insertarIDEnTS(char *id);
 
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud);
-int noExisteEnTS(char * nombre);
+int noExisteEnTS(char *nombre);
 void guardarRenglonesEnTS();
+
+void insertar_tipoDato(int tipo);
+void mostrar_tipoDato();
+char *nombreTipoDato(int tipo);
+
+void sector_declaracion_Id_reiniciar();
+void sector_declaracion_tipoDato_reiniciar();
+char *getNombre_tipoDato(int tipoDato);
+void sector_declaracion_almacenar_tipoDato(int tipoDato);
+int sector_declaracion_almacenar_Id(char *id);
+
+int filter_validarTipoVariable(char *tipoDato);
 
 %}
 
@@ -92,20 +114,20 @@ ID				{LETRA}({LETRA}|{DIGITO})*
 "*"				{ return OP_MULT; }
 "/"				{ return OP_DIV; }
 "_"				{ return GUION_BAJO; }
-{VAR_INI}		{ return VAR_INI; }
-{VAR_FIN}		{ return VAR_FIN; }
+{VAR_INI}		{ sd_procesando = 1; return VAR_INI; }
+{VAR_FIN}		{ sd_procesando = 0; return VAR_FIN; }
 {OP_ESC}		{ return OP_ESC; }
 {OP_LEC}		{ return OP_LEC; }
-{INT}			{ return INT; }
-{FLOAT}			{ return FLOAT; }
-{STRING}		{ return STRING; }
+{INT}			{ sector_declaracion_almacenar_tipoDato(tipoInt); return INT; }
+{FLOAT}			{ sector_declaracion_almacenar_tipoDato(tipoFloat); return FLOAT; }
+{STRING}		{ sector_declaracion_almacenar_tipoDato(tipoString); return STRING; }
 {FILTER}		{ return FILTER; }
 {INLIST}		{ return INLIST; }
 {REPEAT}		{ return REPEAT; }
 {UNTIL}			{ return UNTIL; }
 {IF}			{ return IF; }
 {ELSE}			{ return ELSE; }
-{ID} 			{ yylval.strVal = strdup(yytext); insertarIDEnTS(yylval.strVal); return ID; }
+{ID} 			{ yylval.strVal = strdup(yytext); sector_declaracion_almacenar_Id(yylval.strVal); return ID; }
 {CTE_INT}		{ yylval.intVal = atoi(yytext); validarCteInt(yylval.intVal); insertarCteIntEnTS(yylval.intVal); return CTE_INT; }
 {CTE_REAL}		{ yylval.realVal = atof(yytext); validarCteReal(yylval.realVal); insertarCteRealEnTS(yylval.realVal); return CTE_REAL; }
 {CTE_STRING}	{ yylval.strVal = strdup(yytext); validarCteString(yylval.strVal); insertarCteStringEnTS(yylval.strVal); return CTE_STRING; }
@@ -195,17 +217,10 @@ int insertarCteStringEnTS(char *str)
 	return 1;
 }
 
-int insertarIDEnTS(char *id)
-{
-	insertarEnTS(id, "","","-");
-	return 1;
-}
-
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud)
 {
 	if (noExisteEnTS(nombre))
 	{
-		//printf("INSERTANDO: ********** | %s | %s | %s | %s | **********\n", nombre, tipo, valor, longitud);
 		struct renglonTS renglon;
 		
 		renglon.nombre = nombre;
@@ -246,4 +261,58 @@ void guardarRenglonesEnTS()
 		}		
 		fclose(file);
 	}
+}
+
+/*Funciones para insertar el tipo de dato de las variables (sector de declaracion de variables) en la TS*/
+
+void sector_declaracion_Id_reiniciar(){
+	sd_contador_Id = 0;
+	if(sd_procesando_tipoDato == 0){
+		sd_contador_TipoDato = 0;
+		sd_procesando_tipoDato = 1;
+	}
+	
+}
+
+void sector_declaracion_tipoDato_reiniciar(){
+	sd_procesando_tipoDato = 0;
+}
+
+char *getNombre_tipoDato(int tipoDato){
+
+	switch(tipoDato){
+		case 1:
+			return "INT";
+		case 2:
+			return "FLOAT";
+		default:
+			return "STRING";
+	}	
+}
+
+void sector_declaracion_almacenar_tipoDato(int tipoDato){
+	sector_declaracion_Id_reiniciar();
+	sd_array_TipoDato[sd_contador_TipoDato] = tipoDato;
+	sd_contador_TipoDato++;
+}
+
+int sector_declaracion_almacenar_Id(char *id){
+	sector_declaracion_tipoDato_reiniciar();
+	if(sd_procesando && sd_contador_Id < sd_contador_TipoDato){
+		insertarEnTS(id, getNombre_tipoDato(sd_array_TipoDato[sd_contador_Id]), "", "-");
+		sd_contador_Id++;
+		return 1;
+	}
+}
+
+int filter_validarTipoVariable(char *variable){
+  	int i = 0;
+	for (i; i < cantRenglonesTS; i++) {
+			if (strcmpi(variable, tablaSimbolos[i].nombre) == 0){
+				if(!strcmpi("INT", tablaSimbolos[i].tipo) == 0){
+					printf("Uno de los parametros de: FILTER, no corresponde a una variable del tipo ENTERO\n");
+					exit (1);
+				}
+			}
+		}		
 }

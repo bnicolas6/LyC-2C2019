@@ -11,7 +11,6 @@ char *yyltext;
 char *yytext;
 %}
 
-
 %union {
 int intVal;
 double realVal;
@@ -118,7 +117,7 @@ lectura : OP_LEC ID PUNTO_COMA ;
 
 
 
-filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A lista_variable COR_C PAR_C ;
+filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C ;
 
 filter_lista_condicion :  filter_condicion OP_AND filter_condicion
                         | filter_condicion OP_OR filter_condicion
@@ -130,6 +129,10 @@ filter_lista_condicion :  filter_condicion OP_AND filter_condicion
 filter_condicion :    GUION_BAJO comparacion expresion
                     | expresion comparacion GUION_BAJO
                     ;
+
+filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipoVariable(yylval.strVal); printf("ID es: %s\n",yylval.strVal); } 
+                        | ID {filter_validarTipoVariable(yylval.strVal); printf("ID es: %s\n",yylval.strVal); } 
+                        ;
 
 
 lista_condicion :   condicion OP_AND condicion
@@ -174,11 +177,9 @@ int main(int argc,char *argv[])
   fclose(yyin);
   return 0;
 }
-int yyerror(void)
-     {
-       printf("Syntax Error\n");
-	 system ("Pause");
-	 exit (1);
-     }
 
-
+int yyerror(void){
+  printf("Syntax Error\n");
+	system ("Pause");
+	exit (1);
+}

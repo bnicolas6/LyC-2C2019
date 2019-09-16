@@ -2,8 +2,8 @@
 	un bloque especial para ese fin, delimitado por las
 	palabras reservadas VAR y ENDVAR /--
 VAR
-	[int, float, int] : [edad, peso, nombre];
-	[int, int, int] : [v1, v2, v3];
+	[int, float, int, string, int, int, float] : [edad, peso, nombre];
+	[int, int, int] : [v1, v2, v3, v4, v5, v6];
 ENDVAR
 --/ Así son los comentarios en el 2°Cuat de LyC --/ Año 2019 /-- /--
 {
@@ -18,4 +18,6 @@ ENDVAR
 		peso = 16;
 		print peso;
 	}
+
+	edad = filter (_<(peso+5) && _>(edad*2), [v1, v2, v3]);
 }
