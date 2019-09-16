@@ -3,7 +3,7 @@
 	palabras reservadas VAR y ENDVAR /--
 VAR
 	[int, float, int] : [edad, peso, nombre];
-	[int, int, int] : [v1, v2, v3];
+	[int, int, int, int, int] : [v1, v2, v3, v4, v5];
 ENDVAR
 --/ Así son los comentarios en el 2°Cuat de LyC --/ Año 2019 /-- /--
 {
@@ -20,4 +20,8 @@ ENDVAR
 		nombre = "Juan";
 		print "Otro nombre";
 	}
+	
+	v4 = filter (_<(peso+5) && _>(edad*2) , [v1, v2, v3] );
+	v5 = edad + filter (_<(peso+5) && _>(edad*2) , [v1, v2, v3] );
+	v5 = edad + filter (_<(peso+5) && _>(edad*2) , [v1, v2, nombre] );
 }
