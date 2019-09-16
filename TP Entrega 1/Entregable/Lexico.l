@@ -252,7 +252,7 @@ int noExisteEnTS(char * nombre)
 
 void guardarRenglonesEnTS()
 {
-	FILE * file = fopen("ts.txt", "a");
+	FILE * file = fopen("ts.txt", "w");
 
 	if(file == NULL)
 	{
@@ -260,10 +260,11 @@ void guardarRenglonesEnTS()
 	}
 	else
 	{
+		fprintf(file, "%-15s\t\t %-15s\t\t %-15s\t %-15s\n\n", "NOMBRE", "TIPO", "VALOR", "LONGITUD");
 		int i = 0;
 		for (i; i < cantRenglonesTS; i++)
 		{
-			fprintf(file, "%s\t%s\t%s\t%s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo, tablaSimbolos[i].valor, tablaSimbolos[i].longitud);
+			fprintf(file, "%-15s\t\t %-15s\t\t %-15s\t %-15s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo, tablaSimbolos[i].valor, tablaSimbolos[i].longitud);
 		}
 		fclose(file);
 	}
@@ -303,10 +304,20 @@ void sector_declaracion_almacenar_tipoDato(int tipoDato){
 
 int sector_declaracion_almacenar_Id(char *id){
 	sector_declaracion_tipoDato_reiniciar();
+	int i = 0;
 	if(sd_procesando && sd_contador_Id < sd_contador_TipoDato){
-		insertarEnTS(id, getNombre_tipoDato(sd_array_TipoDato[sd_contador_Id]), "", "-");
-		sd_contador_Id++;
-		return 1;
+		if(noExisteEnTS(id)==-1){
+			insertarEnTS(id, getNombre_tipoDato(sd_array_TipoDato[sd_contador_Id]), "-", "-");
+			sd_contador_Id++;
+		}
+		else{
+			for (i; i < cantRenglonesTS; i++) {
+				if (strcmpi(id, tablaSimbolos[i].nombre) == 0){
+					tablaSimbolos[i].tipo = getNombre_tipoDato(sd_array_TipoDato[sd_contador_Id]);
+				}
+			}
+			return 1;
+		}
 	}
 }
 
