@@ -1,0 +1,479 @@
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+_5	CTE_INT	5	-
+_3	CTE_INT	3	-
+_4	CTE_INT	4	-
+_2	CTE_INT	2	-
+_7	CTE_INT	7	-
+_4	CTE_INT	4	-
+_4	CTE_INT	4	-
+_2	CTE_INT	2	-
+_3	CTE_INT	3	-
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+_4	CTE_INT	4	-
+_3	CTE_INT	3	-
+edad	INT		-
+peso	FLOAT		-
+nombre	INT		-
+v1	INT		-
+v2	INT		-
+v3	INT		-
+_20	CTE_INT	20	-
+_1	CTE_INT	1	-
+_1	CTE_INT	1	-
+_19	CTE_INT	19	-
+_15	CTE_INT	15	-
+_16	CTE_INT	16	-
+_Juan	CTE_STRING	Juan	4
+_Otro nombre	CTE_STRING	Otro nombre	11
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+_5	CTE_INT	5	-
+_3	CTE_INT	3	-
+_4	CTE_INT	4	-
+_2	CTE_INT	2	-
+_7	CTE_INT	7	-
+_4	CTE_INT	4	-
+_4	CTE_INT	4	-
+_2	CTE_INT	2	-
+_3	CTE_INT	3	-
+_5	CTE_INT	5	-
+_2	CTE_INT	2	-
+_4	CTE_INT	4	-
+_3	CTE_INT	3	-
+_2500	CTE_INT	2500	-
+_5	CTE_INT	5	-
+_3	CTE_INT	3	-
+_4	CTE_INT	4	-
+_2	CTE_INT	2	-

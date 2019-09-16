@@ -130,7 +130,13 @@ ID				{LETRA}({LETRA}|{DIGITO})*
 {ID} 			{ yylval.strVal = strdup(yytext); sector_declaracion_almacenar_Id(yylval.strVal); return ID; }
 {CTE_INT}		{ yylval.intVal = atoi(yytext); validarCteInt(yylval.intVal); insertarCteIntEnTS(yylval.intVal); return CTE_INT; }
 {CTE_REAL}		{ yylval.realVal = atof(yytext); validarCteReal(yylval.realVal); insertarCteRealEnTS(yylval.realVal); return CTE_REAL; }
-{CTE_STRING}	{ yylval.strVal = strdup(yytext); validarCteString(yylval.strVal); insertarCteStringEnTS(yylval.strVal); return CTE_STRING; }
+{CTE_STRING}	{ yylval.strVal = strdup(yytext);
+ 				  yylval.strVal = yylval.strVal + 1;
+				  yylval.strVal[strlen(yylval.strVal)-1] = '\0';  
+				  validarCteString(yylval.strVal);		 
+				  insertarCteStringEnTS(yylval.strVal); 
+				  return CTE_STRING; 
+				}
 " "
 "\t"
 "\n"
@@ -171,7 +177,7 @@ int validarCteString(char *str)
 		fprintf(stderr, "Fin de ejecucion.\n");
 		system ("Pause");
 		exit (1);
-	}	
+	}
 	return 1;
 }
 

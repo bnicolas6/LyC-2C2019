@@ -36,41 +36,41 @@ char *strVal;
 %token CTE_INT CTE_REAL CTE_STRING
 %%
 
-start : declaracion programa ;
+start : declaracion programa {printf("\n***** Compilacion exitosa: OK *****\n"); };
 
-declaracion : VAR_INI lista_sentencia_declaracion VAR_FIN ;
+declaracion : VAR_INI {printf("***** Bloque de declaracion de variables - INICIO *****\n"); } lista_sentencia_declaracion VAR_FIN {printf("\n\n***** Bloque de declaracion de variables - FIN *****\n\n"); };
 
 lista_sentencia_declaracion :   lista_sentencia_declaracion sentencia_declaracion
                               | sentencia_declaracion
                               ;
 
 
-sentencia_declaracion : COR_A lista_tipo_dato COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA ;
+sentencia_declaracion : COR_A {printf("\n   -Bloque de declaracion: TIPOS DE DATOS\n"); } lista_tipo_dato {printf("\n   -Bloque de declaracion: VARIABLES\n"); } COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA ;
 
 
 lista_tipo_dato :   lista_tipo_dato SEPARADOR tipo_dato
                   | tipo_dato
                   ;
 
-tipo_dato :   INT {printf("Tipo de Dato: INT\n");}
-            | FLOAT {printf("Tipo de Dato: REAL\n");}
-            | STRING {printf("Tipo de Dato: STRING\n");}
+tipo_dato :   INT {printf(" INT");}
+            | FLOAT {printf(" REAL");}
+            | STRING {printf(" STRING");}
             ;
 
-lista_variable : lista_variable SEPARADOR ID {printf("ID es: %s\n",yylval.strVal);} 
-                 | ID {printf("ID es: %s\n",yylval.strVal);} 
+lista_variable : lista_variable SEPARADOR ID {printf(" %s",yylval.strVal);} 
+                 | ID {printf(" %s",yylval.strVal);} 
                  ;
 
 programa : LLAVE_A lista_sentencia LLAVE_C ;
 
-expresion :   expresion OP_SUMA termino
-            | expresion OP_RESTA termino
-            | termino
+expresion :   expresion { printf(" expresion"); } OP_SUMA termino { printf(" termino"); }
+            | expresion { printf(" expresion"); } OP_RESTA termino { printf(" termino"); }
+            | termino { printf(" termino"); }
             ;
 
-termino :   termino OP_MULT factor
-          | termino OP_DIV factor
-          | factor
+termino :   termino OP_MULT factor { printf(" factor"); }
+          | termino OP_DIV factor { printf(" factor"); }
+          | factor { printf(" factor"); }
           ;
 
 factor :    ID
@@ -86,16 +86,16 @@ lista_sentencia :  lista_sentencia sentencia
                   ;
 
 
-sentencia :   asignacion	{ printf("Asignación OK\n"); }
-            | ciclo		{ printf("Ciclo OK\n"); }
-            | decision		{ printf("Decisión OK\n"); }
-            | escritura		{ printf("Escritura OK\n"); }
-            | lectura		{ printf("Lectura OK\n"); }
+sentencia :   asignacion { printf("  *** asignacion - OK ***\n"); }
+            | ciclo { printf("  *** ciclo - OK ***\n"); }
+            | decision { printf("  *** decision - OK ***\n"); }
+            | escritura { printf("  *** escritura - OK ***\n"); }
+            | lectura { printf("  *** lectura - OK ***\n"); }
             ;
 
 
-asignacion :   ID OP_ASIG expresion PUNTO_COMA
-             | ID OP_ASIG CTE_STRING PUNTO_COMA;
+asignacion :   ID OP_ASIG expresion { printf(" expresion"); } PUNTO_COMA
+             | ID OP_ASIG CTE_STRING PUNTO_COMA ;
 
 
 ciclo : REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA ;
@@ -117,12 +117,12 @@ lectura : OP_LEC ID PUNTO_COMA ;
 
 
 
-filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C ;
+filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C { printf("  *** filter - OK ***\n"); };
 
 filter_lista_condicion :  filter_condicion OP_AND filter_condicion
                         | filter_condicion OP_OR filter_condicion
                         | OP_NOT PAR_A filter_condicion PAR_C
-                        | filter_condicion
+                        | filter_condicion 
                         ;
 
 
@@ -130,8 +130,8 @@ filter_condicion :    GUION_BAJO comparacion expresion
                     | expresion comparacion GUION_BAJO
                     ;
 
-filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipoVariable(yylval.strVal); printf("ID es: %s\n",yylval.strVal); } 
-                        | ID {filter_validarTipoVariable(yylval.strVal); printf("ID es: %s\n",yylval.strVal); } 
+filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipoVariable(yylval.strVal); }
+                        | ID {filter_validarTipoVariable(yylval.strVal); }
                         ;
 
 
@@ -142,7 +142,7 @@ lista_condicion :   condicion OP_AND condicion
                   ;
 
 condicion :   expresion comparacion expresion
-            | inlist
+            | inlist { printf("  *** inlist - OK ***\n"); }
             ;
 
 

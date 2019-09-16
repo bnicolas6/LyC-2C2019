@@ -1,0 +1,1763 @@
+Gramática
+
+    0 $accept: start $end
+
+    1 start: declaracion programa
+
+    2 $@1: /* vacío */
+
+    3 declaracion: VAR_INI $@1 lista_sentencia_declaracion VAR_FIN
+
+    4 lista_sentencia_declaracion: lista_sentencia_declaracion sentencia_declaracion
+    5                            | sentencia_declaracion
+
+    6 $@2: /* vacío */
+
+    7 $@3: /* vacío */
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA
+
+    9 lista_tipo_dato: lista_tipo_dato SEPARADOR tipo_dato
+   10                | tipo_dato
+
+   11 tipo_dato: INT
+   12          | FLOAT
+   13          | STRING
+
+   14 lista_variable: lista_variable SEPARADOR ID
+   15               | ID
+
+   16 programa: LLAVE_A lista_sentencia LLAVE_C
+
+   17 $@4: /* vacío */
+
+   18 expresion: expresion $@4 OP_SUMA termino
+
+   19 $@5: /* vacío */
+
+   20 expresion: expresion $@5 OP_RESTA termino
+   21          | termino
+
+   22 termino: termino OP_MULT factor
+   23        | termino OP_DIV factor
+   24        | factor
+
+   25 factor: ID
+   26       | CTE_INT
+   27       | CTE_REAL
+   28       | filter
+   29       | PAR_A expresion PAR_C
+
+   30 lista_sentencia: lista_sentencia sentencia
+   31                | sentencia
+
+   32 sentencia: asignacion
+   33          | ciclo
+   34          | decision
+   35          | escritura
+   36          | lectura
+
+   37 $@6: /* vacío */
+
+   38 asignacion: ID OP_ASIG expresion $@6 PUNTO_COMA
+   39           | ID OP_ASIG CTE_STRING PUNTO_COMA
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA
+
+   41 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C
+   42         | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+   43 escritura: OP_ESC ID PUNTO_COMA
+   44          | OP_ESC CTE_INT PUNTO_COMA
+   45          | OP_ESC CTE_REAL PUNTO_COMA
+   46          | OP_ESC CTE_STRING PUNTO_COMA
+
+   47 lectura: OP_LEC ID PUNTO_COMA
+
+   48 filter: FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+
+   49 filter_lista_condicion: filter_condicion OP_AND filter_condicion
+   50                       | filter_condicion OP_OR filter_condicion
+   51                       | OP_NOT PAR_A filter_condicion PAR_C
+   52                       | filter_condicion
+
+   53 filter_condicion: GUION_BAJO comparacion expresion
+   54                 | expresion comparacion GUION_BAJO
+
+   55 filter_lista_variable: filter_lista_variable SEPARADOR ID
+   56                      | ID
+
+   57 lista_condicion: condicion OP_AND condicion
+   58                | condicion OP_OR condicion
+   59                | OP_NOT PAR_A condicion PAR_C
+   60                | condicion
+
+   61 condicion: expresion comparacion expresion
+   62          | inlist
+
+   63 comparacion: OP_MAYOR
+   64            | OP_MENOR
+   65            | OP_MAYOR_IGUAL
+   66            | OP_MENOR_IGUAL
+   67            | OP_IGUAL
+   68            | OP_DISTINTO
+
+   69 inlist: INLIST PAR_A ID PUNTO_COMA COR_A lista_expresiones COR_C PAR_C
+
+   70 lista_expresiones: lista_expresiones PUNTO_COMA expresion
+   71                  | expresion
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+error (256)
+OP_ASIG (258) 38 39
+OP_AND (259) 49 57
+OP_OR (260) 50 58
+OP_NOT (261) 51 59
+OP_MAYOR (262) 63
+OP_MENOR (263) 64
+OP_MAYOR_IGUAL (264) 65
+OP_MENOR_IGUAL (265) 66
+OP_IGUAL (266) 67
+OP_DISTINTO (267) 68
+PAR_A (268) 29 40 41 42 48 51 59 69
+PAR_C (269) 29 40 41 42 48 51 59 69
+COR_A (270) 8 48 69
+COR_C (271) 8 48 69
+LLAVE_A (272) 16 40 41 42
+LLAVE_C (273) 16 40 41 42
+VAR_ASIG (274) 8
+SEPARADOR (275) 9 14 48 55
+PUNTO_COMA (276) 8 38 39 40 43 44 45 46 47 69 70
+OP_SUMA (277) 18
+OP_RESTA (278) 20
+OP_MULT (279) 22
+OP_DIV (280) 23
+GUION_BAJO (281) 53 54
+VAR_INI (282) 3
+VAR_FIN (283) 3
+OP_ESC (284) 43 44 45 46
+OP_LEC (285) 47
+INT (286) 11
+FLOAT (287) 12
+STRING (288) 13
+FILTER (289) 48
+INLIST (290) 69
+REPEAT (291) 40
+UNTIL (292) 40
+IF (293) 41 42
+ELSE (294) 42
+ID (295) 14 15 25 38 39 43 47 55 56 69
+CTE_INT (296) 26 44
+CTE_REAL (297) 27 45
+CTE_STRING (298) 39 46
+
+
+No terminales con las reglas donde aparecen
+
+$accept (44)
+    en la izquierda: 0
+start (45)
+    en la izquierda: 1, en la derecha: 0
+declaracion (46)
+    en la izquierda: 3, en la derecha: 1
+$@1 (47)
+    en la izquierda: 2, en la derecha: 3
+lista_sentencia_declaracion (48)
+    en la izquierda: 4 5, en la derecha: 3 4
+sentencia_declaracion (49)
+    en la izquierda: 8, en la derecha: 4 5
+$@2 (50)
+    en la izquierda: 6, en la derecha: 8
+$@3 (51)
+    en la izquierda: 7, en la derecha: 8
+lista_tipo_dato (52)
+    en la izquierda: 9 10, en la derecha: 8 9
+tipo_dato (53)
+    en la izquierda: 11 12 13, en la derecha: 9 10
+lista_variable (54)
+    en la izquierda: 14 15, en la derecha: 8 14
+programa (55)
+    en la izquierda: 16, en la derecha: 1
+expresion (56)
+    en la izquierda: 18 20 21, en la derecha: 18 20 29 38 53 54 61
+    70 71
+$@4 (57)
+    en la izquierda: 17, en la derecha: 18
+$@5 (58)
+    en la izquierda: 19, en la derecha: 20
+termino (59)
+    en la izquierda: 22 23 24, en la derecha: 18 20 21 22 23
+factor (60)
+    en la izquierda: 25 26 27 28 29, en la derecha: 22 23 24
+lista_sentencia (61)
+    en la izquierda: 30 31, en la derecha: 16 30 40 41 42
+sentencia (62)
+    en la izquierda: 32 33 34 35 36, en la derecha: 30 31
+asignacion (63)
+    en la izquierda: 38 39, en la derecha: 32
+$@6 (64)
+    en la izquierda: 37, en la derecha: 38
+ciclo (65)
+    en la izquierda: 40, en la derecha: 33
+decision (66)
+    en la izquierda: 41 42, en la derecha: 34
+escritura (67)
+    en la izquierda: 43 44 45 46, en la derecha: 35
+lectura (68)
+    en la izquierda: 47, en la derecha: 36
+filter (69)
+    en la izquierda: 48, en la derecha: 28
+filter_lista_condicion (70)
+    en la izquierda: 49 50 51 52, en la derecha: 48
+filter_condicion (71)
+    en la izquierda: 53 54, en la derecha: 49 50 51 52
+filter_lista_variable (72)
+    en la izquierda: 55 56, en la derecha: 48 55
+lista_condicion (73)
+    en la izquierda: 57 58 59 60, en la derecha: 40 41 42
+condicion (74)
+    en la izquierda: 61 62, en la derecha: 57 58 59 60
+comparacion (75)
+    en la izquierda: 63 64 65 66 67 68, en la derecha: 53 54 61
+inlist (76)
+    en la izquierda: 69, en la derecha: 62
+lista_expresiones (77)
+    en la izquierda: 70 71, en la derecha: 69 70
+
+
+estado 0
+
+    0 $accept: . start $end
+
+    VAR_INI  desplazar e ir al estado 1
+
+    start        ir al estado 2
+    declaracion  ir al estado 3
+
+
+estado 1
+
+    3 declaracion: VAR_INI . $@1 lista_sentencia_declaracion VAR_FIN
+
+    $default  reduce usando la regla 2 ($@1)
+
+    $@1  ir al estado 4
+
+
+estado 2
+
+    0 $accept: start . $end
+
+    $end  desplazar e ir al estado 5
+
+
+estado 3
+
+    1 start: declaracion . programa
+
+    LLAVE_A  desplazar e ir al estado 6
+
+    programa  ir al estado 7
+
+
+estado 4
+
+    3 declaracion: VAR_INI $@1 . lista_sentencia_declaracion VAR_FIN
+
+    COR_A  desplazar e ir al estado 8
+
+    lista_sentencia_declaracion  ir al estado 9
+    sentencia_declaracion        ir al estado 10
+
+
+estado 5
+
+    0 $accept: start $end .
+
+    $default  aceptar
+
+
+estado 6
+
+   16 programa: LLAVE_A . lista_sentencia LLAVE_C
+
+    OP_ESC  desplazar e ir al estado 11
+    OP_LEC  desplazar e ir al estado 12
+    REPEAT  desplazar e ir al estado 13
+    IF      desplazar e ir al estado 14
+    ID      desplazar e ir al estado 15
+
+    lista_sentencia  ir al estado 16
+    sentencia        ir al estado 17
+    asignacion       ir al estado 18
+    ciclo            ir al estado 19
+    decision         ir al estado 20
+    escritura        ir al estado 21
+    lectura          ir al estado 22
+
+
+estado 7
+
+    1 start: declaracion programa .
+
+    $default  reduce usando la regla 1 (start)
+
+
+estado 8
+
+    8 sentencia_declaracion: COR_A . $@2 lista_tipo_dato $@3 COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA
+
+    $default  reduce usando la regla 6 ($@2)
+
+    $@2  ir al estado 23
+
+
+estado 9
+
+    3 declaracion: VAR_INI $@1 lista_sentencia_declaracion . VAR_FIN
+    4 lista_sentencia_declaracion: lista_sentencia_declaracion . sentencia_declaracion
+
+    COR_A    desplazar e ir al estado 8
+    VAR_FIN  desplazar e ir al estado 24
+
+    sentencia_declaracion  ir al estado 25
+
+
+estado 10
+
+    5 lista_sentencia_declaracion: sentencia_declaracion .
+
+    $default  reduce usando la regla 5 (lista_sentencia_declaracion)
+
+
+estado 11
+
+   43 escritura: OP_ESC . ID PUNTO_COMA
+   44          | OP_ESC . CTE_INT PUNTO_COMA
+   45          | OP_ESC . CTE_REAL PUNTO_COMA
+   46          | OP_ESC . CTE_STRING PUNTO_COMA
+
+    ID          desplazar e ir al estado 26
+    CTE_INT     desplazar e ir al estado 27
+    CTE_REAL    desplazar e ir al estado 28
+    CTE_STRING  desplazar e ir al estado 29
+
+
+estado 12
+
+   47 lectura: OP_LEC . ID PUNTO_COMA
+
+    ID  desplazar e ir al estado 30
+
+
+estado 13
+
+   40 ciclo: REPEAT . LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA
+
+    LLAVE_A  desplazar e ir al estado 31
+
+
+estado 14
+
+   41 decision: IF . PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C
+   42         | IF . PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    PAR_A  desplazar e ir al estado 32
+
+
+estado 15
+
+   38 asignacion: ID . OP_ASIG expresion $@6 PUNTO_COMA
+   39           | ID . OP_ASIG CTE_STRING PUNTO_COMA
+
+    OP_ASIG  desplazar e ir al estado 33
+
+
+estado 16
+
+   16 programa: LLAVE_A lista_sentencia . LLAVE_C
+   30 lista_sentencia: lista_sentencia . sentencia
+
+    LLAVE_C  desplazar e ir al estado 34
+    OP_ESC   desplazar e ir al estado 11
+    OP_LEC   desplazar e ir al estado 12
+    REPEAT   desplazar e ir al estado 13
+    IF       desplazar e ir al estado 14
+    ID       desplazar e ir al estado 15
+
+    sentencia   ir al estado 35
+    asignacion  ir al estado 18
+    ciclo       ir al estado 19
+    decision    ir al estado 20
+    escritura   ir al estado 21
+    lectura     ir al estado 22
+
+
+estado 17
+
+   31 lista_sentencia: sentencia .
+
+    $default  reduce usando la regla 31 (lista_sentencia)
+
+
+estado 18
+
+   32 sentencia: asignacion .
+
+    $default  reduce usando la regla 32 (sentencia)
+
+
+estado 19
+
+   33 sentencia: ciclo .
+
+    $default  reduce usando la regla 33 (sentencia)
+
+
+estado 20
+
+   34 sentencia: decision .
+
+    $default  reduce usando la regla 34 (sentencia)
+
+
+estado 21
+
+   35 sentencia: escritura .
+
+    $default  reduce usando la regla 35 (sentencia)
+
+
+estado 22
+
+   36 sentencia: lectura .
+
+    $default  reduce usando la regla 36 (sentencia)
+
+
+estado 23
+
+    8 sentencia_declaracion: COR_A $@2 . lista_tipo_dato $@3 COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA
+
+    INT     desplazar e ir al estado 36
+    FLOAT   desplazar e ir al estado 37
+    STRING  desplazar e ir al estado 38
+
+    lista_tipo_dato  ir al estado 39
+    tipo_dato        ir al estado 40
+
+
+estado 24
+
+    3 declaracion: VAR_INI $@1 lista_sentencia_declaracion VAR_FIN .
+
+    $default  reduce usando la regla 3 (declaracion)
+
+
+estado 25
+
+    4 lista_sentencia_declaracion: lista_sentencia_declaracion sentencia_declaracion .
+
+    $default  reduce usando la regla 4 (lista_sentencia_declaracion)
+
+
+estado 26
+
+   43 escritura: OP_ESC ID . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 41
+
+
+estado 27
+
+   44 escritura: OP_ESC CTE_INT . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 42
+
+
+estado 28
+
+   45 escritura: OP_ESC CTE_REAL . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 43
+
+
+estado 29
+
+   46 escritura: OP_ESC CTE_STRING . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 44
+
+
+estado 30
+
+   47 lectura: OP_LEC ID . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 45
+
+
+estado 31
+
+   40 ciclo: REPEAT LLAVE_A . lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA
+
+    OP_ESC  desplazar e ir al estado 11
+    OP_LEC  desplazar e ir al estado 12
+    REPEAT  desplazar e ir al estado 13
+    IF      desplazar e ir al estado 14
+    ID      desplazar e ir al estado 15
+
+    lista_sentencia  ir al estado 46
+    sentencia        ir al estado 17
+    asignacion       ir al estado 18
+    ciclo            ir al estado 19
+    decision         ir al estado 20
+    escritura        ir al estado 21
+    lectura          ir al estado 22
+
+
+estado 32
+
+   41 decision: IF PAR_A . lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C
+   42         | IF PAR_A . lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    OP_NOT    desplazar e ir al estado 47
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    INLIST    desplazar e ir al estado 50
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion        ir al estado 54
+    termino          ir al estado 55
+    factor           ir al estado 56
+    filter           ir al estado 57
+    lista_condicion  ir al estado 58
+    condicion        ir al estado 59
+    inlist           ir al estado 60
+
+
+estado 33
+
+   38 asignacion: ID OP_ASIG . expresion $@6 PUNTO_COMA
+   39           | ID OP_ASIG . CTE_STRING PUNTO_COMA
+
+    PAR_A       desplazar e ir al estado 48
+    FILTER      desplazar e ir al estado 49
+    ID          desplazar e ir al estado 51
+    CTE_INT     desplazar e ir al estado 52
+    CTE_REAL    desplazar e ir al estado 53
+    CTE_STRING  desplazar e ir al estado 61
+
+    expresion  ir al estado 62
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+
+
+estado 34
+
+   16 programa: LLAVE_A lista_sentencia LLAVE_C .
+
+    $default  reduce usando la regla 16 (programa)
+
+
+estado 35
+
+   30 lista_sentencia: lista_sentencia sentencia .
+
+    $default  reduce usando la regla 30 (lista_sentencia)
+
+
+estado 36
+
+   11 tipo_dato: INT .
+
+    $default  reduce usando la regla 11 (tipo_dato)
+
+
+estado 37
+
+   12 tipo_dato: FLOAT .
+
+    $default  reduce usando la regla 12 (tipo_dato)
+
+
+estado 38
+
+   13 tipo_dato: STRING .
+
+    $default  reduce usando la regla 13 (tipo_dato)
+
+
+estado 39
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato . $@3 COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA
+    9 lista_tipo_dato: lista_tipo_dato . SEPARADOR tipo_dato
+
+    SEPARADOR  desplazar e ir al estado 63
+
+    $default  reduce usando la regla 7 ($@3)
+
+    $@3  ir al estado 64
+
+
+estado 40
+
+   10 lista_tipo_dato: tipo_dato .
+
+    $default  reduce usando la regla 10 (lista_tipo_dato)
+
+
+estado 41
+
+   43 escritura: OP_ESC ID PUNTO_COMA .
+
+    $default  reduce usando la regla 43 (escritura)
+
+
+estado 42
+
+   44 escritura: OP_ESC CTE_INT PUNTO_COMA .
+
+    $default  reduce usando la regla 44 (escritura)
+
+
+estado 43
+
+   45 escritura: OP_ESC CTE_REAL PUNTO_COMA .
+
+    $default  reduce usando la regla 45 (escritura)
+
+
+estado 44
+
+   46 escritura: OP_ESC CTE_STRING PUNTO_COMA .
+
+    $default  reduce usando la regla 46 (escritura)
+
+
+estado 45
+
+   47 lectura: OP_LEC ID PUNTO_COMA .
+
+    $default  reduce usando la regla 47 (lectura)
+
+
+estado 46
+
+   30 lista_sentencia: lista_sentencia . sentencia
+   40 ciclo: REPEAT LLAVE_A lista_sentencia . LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA
+
+    LLAVE_C  desplazar e ir al estado 65
+    OP_ESC   desplazar e ir al estado 11
+    OP_LEC   desplazar e ir al estado 12
+    REPEAT   desplazar e ir al estado 13
+    IF       desplazar e ir al estado 14
+    ID       desplazar e ir al estado 15
+
+    sentencia   ir al estado 35
+    asignacion  ir al estado 18
+    ciclo       ir al estado 19
+    decision    ir al estado 20
+    escritura   ir al estado 21
+    lectura     ir al estado 22
+
+
+estado 47
+
+   59 lista_condicion: OP_NOT . PAR_A condicion PAR_C
+
+    PAR_A  desplazar e ir al estado 66
+
+
+estado 48
+
+   29 factor: PAR_A . expresion PAR_C
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 67
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+
+
+estado 49
+
+   48 filter: FILTER . PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+
+    PAR_A  desplazar e ir al estado 68
+
+
+estado 50
+
+   69 inlist: INLIST . PAR_A ID PUNTO_COMA COR_A lista_expresiones COR_C PAR_C
+
+    PAR_A  desplazar e ir al estado 69
+
+
+estado 51
+
+   25 factor: ID .
+
+    $default  reduce usando la regla 25 (factor)
+
+
+estado 52
+
+   26 factor: CTE_INT .
+
+    $default  reduce usando la regla 26 (factor)
+
+
+estado 53
+
+   27 factor: CTE_REAL .
+
+    $default  reduce usando la regla 27 (factor)
+
+
+estado 54
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   61 condicion: expresion . comparacion expresion
+
+    OP_MAYOR        desplazar e ir al estado 70
+    OP_MENOR        desplazar e ir al estado 71
+    OP_MAYOR_IGUAL  desplazar e ir al estado 72
+    OP_MENOR_IGUAL  desplazar e ir al estado 73
+    OP_IGUAL        desplazar e ir al estado 74
+    OP_DISTINTO     desplazar e ir al estado 75
+
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 17 ($@4)
+
+    $@4          ir al estado 76
+    $@5          ir al estado 77
+    comparacion  ir al estado 78
+
+
+estado 55
+
+   21 expresion: termino .
+   22 termino: termino . OP_MULT factor
+   23        | termino . OP_DIV factor
+
+    OP_MULT  desplazar e ir al estado 79
+    OP_DIV   desplazar e ir al estado 80
+
+    $default  reduce usando la regla 21 (expresion)
+
+
+estado 56
+
+   24 termino: factor .
+
+    $default  reduce usando la regla 24 (termino)
+
+
+estado 57
+
+   28 factor: filter .
+
+    $default  reduce usando la regla 28 (factor)
+
+
+estado 58
+
+   41 decision: IF PAR_A lista_condicion . PAR_C LLAVE_A lista_sentencia LLAVE_C
+   42         | IF PAR_A lista_condicion . PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    PAR_C  desplazar e ir al estado 81
+
+
+estado 59
+
+   57 lista_condicion: condicion . OP_AND condicion
+   58                | condicion . OP_OR condicion
+   60                | condicion .
+
+    OP_AND  desplazar e ir al estado 82
+    OP_OR   desplazar e ir al estado 83
+
+    $default  reduce usando la regla 60 (lista_condicion)
+
+
+estado 60
+
+   62 condicion: inlist .
+
+    $default  reduce usando la regla 62 (condicion)
+
+
+estado 61
+
+   39 asignacion: ID OP_ASIG CTE_STRING . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 84
+
+
+estado 62
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   38 asignacion: ID OP_ASIG expresion . $@6 PUNTO_COMA
+
+    PUNTO_COMA  reduce usando la regla 37 ($@6)
+    OP_RESTA    reduce usando la regla 19 ($@5)
+    $default    reduce usando la regla 17 ($@4)
+
+    $@4  ir al estado 76
+    $@5  ir al estado 77
+    $@6  ir al estado 85
+
+
+estado 63
+
+    9 lista_tipo_dato: lista_tipo_dato SEPARADOR . tipo_dato
+
+    INT     desplazar e ir al estado 36
+    FLOAT   desplazar e ir al estado 37
+    STRING  desplazar e ir al estado 38
+
+    tipo_dato  ir al estado 86
+
+
+estado 64
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 . COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA
+
+    COR_C  desplazar e ir al estado 87
+
+
+estado 65
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C . UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA
+
+    UNTIL  desplazar e ir al estado 88
+
+
+estado 66
+
+   59 lista_condicion: OP_NOT PAR_A . condicion PAR_C
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    INLIST    desplazar e ir al estado 50
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 54
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+    condicion  ir al estado 89
+    inlist     ir al estado 60
+
+
+estado 67
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   29 factor: PAR_A expresion . PAR_C
+
+    PAR_C  desplazar e ir al estado 90
+
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 17 ($@4)
+
+    $@4  ir al estado 76
+    $@5  ir al estado 77
+
+
+estado 68
+
+   48 filter: FILTER PAR_A . filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+
+    OP_NOT      desplazar e ir al estado 91
+    PAR_A       desplazar e ir al estado 48
+    GUION_BAJO  desplazar e ir al estado 92
+    FILTER      desplazar e ir al estado 49
+    ID          desplazar e ir al estado 51
+    CTE_INT     desplazar e ir al estado 52
+    CTE_REAL    desplazar e ir al estado 53
+
+    expresion               ir al estado 93
+    termino                 ir al estado 55
+    factor                  ir al estado 56
+    filter                  ir al estado 57
+    filter_lista_condicion  ir al estado 94
+    filter_condicion        ir al estado 95
+
+
+estado 69
+
+   69 inlist: INLIST PAR_A . ID PUNTO_COMA COR_A lista_expresiones COR_C PAR_C
+
+    ID  desplazar e ir al estado 96
+
+
+estado 70
+
+   63 comparacion: OP_MAYOR .
+
+    $default  reduce usando la regla 63 (comparacion)
+
+
+estado 71
+
+   64 comparacion: OP_MENOR .
+
+    $default  reduce usando la regla 64 (comparacion)
+
+
+estado 72
+
+   65 comparacion: OP_MAYOR_IGUAL .
+
+    $default  reduce usando la regla 65 (comparacion)
+
+
+estado 73
+
+   66 comparacion: OP_MENOR_IGUAL .
+
+    $default  reduce usando la regla 66 (comparacion)
+
+
+estado 74
+
+   67 comparacion: OP_IGUAL .
+
+    $default  reduce usando la regla 67 (comparacion)
+
+
+estado 75
+
+   68 comparacion: OP_DISTINTO .
+
+    $default  reduce usando la regla 68 (comparacion)
+
+
+estado 76
+
+   18 expresion: expresion $@4 . OP_SUMA termino
+
+    OP_SUMA  desplazar e ir al estado 97
+
+
+estado 77
+
+   20 expresion: expresion $@5 . OP_RESTA termino
+
+    OP_RESTA  desplazar e ir al estado 98
+
+
+estado 78
+
+   61 condicion: expresion comparacion . expresion
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 99
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+
+
+estado 79
+
+   22 termino: termino OP_MULT . factor
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    factor  ir al estado 100
+    filter  ir al estado 57
+
+
+estado 80
+
+   23 termino: termino OP_DIV . factor
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    factor  ir al estado 101
+    filter  ir al estado 57
+
+
+estado 81
+
+   41 decision: IF PAR_A lista_condicion PAR_C . LLAVE_A lista_sentencia LLAVE_C
+   42         | IF PAR_A lista_condicion PAR_C . LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    LLAVE_A  desplazar e ir al estado 102
+
+
+estado 82
+
+   57 lista_condicion: condicion OP_AND . condicion
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    INLIST    desplazar e ir al estado 50
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 54
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+    condicion  ir al estado 103
+    inlist     ir al estado 60
+
+
+estado 83
+
+   58 lista_condicion: condicion OP_OR . condicion
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    INLIST    desplazar e ir al estado 50
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 54
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+    condicion  ir al estado 104
+    inlist     ir al estado 60
+
+
+estado 84
+
+   39 asignacion: ID OP_ASIG CTE_STRING PUNTO_COMA .
+
+    $default  reduce usando la regla 39 (asignacion)
+
+
+estado 85
+
+   38 asignacion: ID OP_ASIG expresion $@6 . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 105
+
+
+estado 86
+
+    9 lista_tipo_dato: lista_tipo_dato SEPARADOR tipo_dato .
+
+    $default  reduce usando la regla 9 (lista_tipo_dato)
+
+
+estado 87
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C . VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA
+
+    VAR_ASIG  desplazar e ir al estado 106
+
+
+estado 88
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL . PAR_A lista_condicion PAR_C PUNTO_COMA
+
+    PAR_A  desplazar e ir al estado 107
+
+
+estado 89
+
+   59 lista_condicion: OP_NOT PAR_A condicion . PAR_C
+
+    PAR_C  desplazar e ir al estado 108
+
+
+estado 90
+
+   29 factor: PAR_A expresion PAR_C .
+
+    $default  reduce usando la regla 29 (factor)
+
+
+estado 91
+
+   51 filter_lista_condicion: OP_NOT . PAR_A filter_condicion PAR_C
+
+    PAR_A  desplazar e ir al estado 109
+
+
+estado 92
+
+   53 filter_condicion: GUION_BAJO . comparacion expresion
+
+    OP_MAYOR        desplazar e ir al estado 70
+    OP_MENOR        desplazar e ir al estado 71
+    OP_MAYOR_IGUAL  desplazar e ir al estado 72
+    OP_MENOR_IGUAL  desplazar e ir al estado 73
+    OP_IGUAL        desplazar e ir al estado 74
+    OP_DISTINTO     desplazar e ir al estado 75
+
+    comparacion  ir al estado 110
+
+
+estado 93
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   54 filter_condicion: expresion . comparacion GUION_BAJO
+
+    OP_MAYOR        desplazar e ir al estado 70
+    OP_MENOR        desplazar e ir al estado 71
+    OP_MAYOR_IGUAL  desplazar e ir al estado 72
+    OP_MENOR_IGUAL  desplazar e ir al estado 73
+    OP_IGUAL        desplazar e ir al estado 74
+    OP_DISTINTO     desplazar e ir al estado 75
+
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 17 ($@4)
+
+    $@4          ir al estado 76
+    $@5          ir al estado 77
+    comparacion  ir al estado 111
+
+
+estado 94
+
+   48 filter: FILTER PAR_A filter_lista_condicion . SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+
+    SEPARADOR  desplazar e ir al estado 112
+
+
+estado 95
+
+   49 filter_lista_condicion: filter_condicion . OP_AND filter_condicion
+   50                       | filter_condicion . OP_OR filter_condicion
+   52                       | filter_condicion .
+
+    OP_AND  desplazar e ir al estado 113
+    OP_OR   desplazar e ir al estado 114
+
+    $default  reduce usando la regla 52 (filter_lista_condicion)
+
+
+estado 96
+
+   69 inlist: INLIST PAR_A ID . PUNTO_COMA COR_A lista_expresiones COR_C PAR_C
+
+    PUNTO_COMA  desplazar e ir al estado 115
+
+
+estado 97
+
+   18 expresion: expresion $@4 OP_SUMA . termino
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    termino  ir al estado 116
+    factor   ir al estado 56
+    filter   ir al estado 57
+
+
+estado 98
+
+   20 expresion: expresion $@5 OP_RESTA . termino
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    termino  ir al estado 117
+    factor   ir al estado 56
+    filter   ir al estado 57
+
+
+estado 99
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   61 condicion: expresion comparacion expresion .
+
+    OP_SUMA   reduce usando la regla 17 ($@4)
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 61 (condicion)
+
+    $@4  ir al estado 76
+    $@5  ir al estado 77
+
+
+estado 100
+
+   22 termino: termino OP_MULT factor .
+
+    $default  reduce usando la regla 22 (termino)
+
+
+estado 101
+
+   23 termino: termino OP_DIV factor .
+
+    $default  reduce usando la regla 23 (termino)
+
+
+estado 102
+
+   41 decision: IF PAR_A lista_condicion PAR_C LLAVE_A . lista_sentencia LLAVE_C
+   42         | IF PAR_A lista_condicion PAR_C LLAVE_A . lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    OP_ESC  desplazar e ir al estado 11
+    OP_LEC  desplazar e ir al estado 12
+    REPEAT  desplazar e ir al estado 13
+    IF      desplazar e ir al estado 14
+    ID      desplazar e ir al estado 15
+
+    lista_sentencia  ir al estado 118
+    sentencia        ir al estado 17
+    asignacion       ir al estado 18
+    ciclo            ir al estado 19
+    decision         ir al estado 20
+    escritura        ir al estado 21
+    lectura          ir al estado 22
+
+
+estado 103
+
+   57 lista_condicion: condicion OP_AND condicion .
+
+    $default  reduce usando la regla 57 (lista_condicion)
+
+
+estado 104
+
+   58 lista_condicion: condicion OP_OR condicion .
+
+    $default  reduce usando la regla 58 (lista_condicion)
+
+
+estado 105
+
+   38 asignacion: ID OP_ASIG expresion $@6 PUNTO_COMA .
+
+    $default  reduce usando la regla 38 (asignacion)
+
+
+estado 106
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C VAR_ASIG . COR_A lista_variable COR_C PUNTO_COMA
+
+    COR_A  desplazar e ir al estado 119
+
+
+estado 107
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A . lista_condicion PAR_C PUNTO_COMA
+
+    OP_NOT    desplazar e ir al estado 47
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    INLIST    desplazar e ir al estado 50
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion        ir al estado 54
+    termino          ir al estado 55
+    factor           ir al estado 56
+    filter           ir al estado 57
+    lista_condicion  ir al estado 120
+    condicion        ir al estado 59
+    inlist           ir al estado 60
+
+
+estado 108
+
+   59 lista_condicion: OP_NOT PAR_A condicion PAR_C .
+
+    $default  reduce usando la regla 59 (lista_condicion)
+
+
+estado 109
+
+   51 filter_lista_condicion: OP_NOT PAR_A . filter_condicion PAR_C
+
+    PAR_A       desplazar e ir al estado 48
+    GUION_BAJO  desplazar e ir al estado 92
+    FILTER      desplazar e ir al estado 49
+    ID          desplazar e ir al estado 51
+    CTE_INT     desplazar e ir al estado 52
+    CTE_REAL    desplazar e ir al estado 53
+
+    expresion         ir al estado 93
+    termino           ir al estado 55
+    factor            ir al estado 56
+    filter            ir al estado 57
+    filter_condicion  ir al estado 121
+
+
+estado 110
+
+   53 filter_condicion: GUION_BAJO comparacion . expresion
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 122
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+
+
+estado 111
+
+   54 filter_condicion: expresion comparacion . GUION_BAJO
+
+    GUION_BAJO  desplazar e ir al estado 123
+
+
+estado 112
+
+   48 filter: FILTER PAR_A filter_lista_condicion SEPARADOR . COR_A filter_lista_variable COR_C PAR_C
+
+    COR_A  desplazar e ir al estado 124
+
+
+estado 113
+
+   49 filter_lista_condicion: filter_condicion OP_AND . filter_condicion
+
+    PAR_A       desplazar e ir al estado 48
+    GUION_BAJO  desplazar e ir al estado 92
+    FILTER      desplazar e ir al estado 49
+    ID          desplazar e ir al estado 51
+    CTE_INT     desplazar e ir al estado 52
+    CTE_REAL    desplazar e ir al estado 53
+
+    expresion         ir al estado 93
+    termino           ir al estado 55
+    factor            ir al estado 56
+    filter            ir al estado 57
+    filter_condicion  ir al estado 125
+
+
+estado 114
+
+   50 filter_lista_condicion: filter_condicion OP_OR . filter_condicion
+
+    PAR_A       desplazar e ir al estado 48
+    GUION_BAJO  desplazar e ir al estado 92
+    FILTER      desplazar e ir al estado 49
+    ID          desplazar e ir al estado 51
+    CTE_INT     desplazar e ir al estado 52
+    CTE_REAL    desplazar e ir al estado 53
+
+    expresion         ir al estado 93
+    termino           ir al estado 55
+    factor            ir al estado 56
+    filter            ir al estado 57
+    filter_condicion  ir al estado 126
+
+
+estado 115
+
+   69 inlist: INLIST PAR_A ID PUNTO_COMA . COR_A lista_expresiones COR_C PAR_C
+
+    COR_A  desplazar e ir al estado 127
+
+
+estado 116
+
+   18 expresion: expresion $@4 OP_SUMA termino .
+   22 termino: termino . OP_MULT factor
+   23        | termino . OP_DIV factor
+
+    OP_MULT  desplazar e ir al estado 79
+    OP_DIV   desplazar e ir al estado 80
+
+    $default  reduce usando la regla 18 (expresion)
+
+
+estado 117
+
+   20 expresion: expresion $@5 OP_RESTA termino .
+   22 termino: termino . OP_MULT factor
+   23        | termino . OP_DIV factor
+
+    OP_MULT  desplazar e ir al estado 79
+    OP_DIV   desplazar e ir al estado 80
+
+    $default  reduce usando la regla 20 (expresion)
+
+
+estado 118
+
+   30 lista_sentencia: lista_sentencia . sentencia
+   41 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia . LLAVE_C
+   42         | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia . LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    LLAVE_C  desplazar e ir al estado 128
+    OP_ESC   desplazar e ir al estado 11
+    OP_LEC   desplazar e ir al estado 12
+    REPEAT   desplazar e ir al estado 13
+    IF       desplazar e ir al estado 14
+    ID       desplazar e ir al estado 15
+
+    sentencia   ir al estado 35
+    asignacion  ir al estado 18
+    ciclo       ir al estado 19
+    decision    ir al estado 20
+    escritura   ir al estado 21
+    lectura     ir al estado 22
+
+
+estado 119
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C VAR_ASIG COR_A . lista_variable COR_C PUNTO_COMA
+
+    ID  desplazar e ir al estado 129
+
+    lista_variable  ir al estado 130
+
+
+estado 120
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion . PAR_C PUNTO_COMA
+
+    PAR_C  desplazar e ir al estado 131
+
+
+estado 121
+
+   51 filter_lista_condicion: OP_NOT PAR_A filter_condicion . PAR_C
+
+    PAR_C  desplazar e ir al estado 132
+
+
+estado 122
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   53 filter_condicion: GUION_BAJO comparacion expresion .
+
+    OP_SUMA   reduce usando la regla 17 ($@4)
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 53 (filter_condicion)
+
+    $@4  ir al estado 76
+    $@5  ir al estado 77
+
+
+estado 123
+
+   54 filter_condicion: expresion comparacion GUION_BAJO .
+
+    $default  reduce usando la regla 54 (filter_condicion)
+
+
+estado 124
+
+   48 filter: FILTER PAR_A filter_lista_condicion SEPARADOR COR_A . filter_lista_variable COR_C PAR_C
+
+    ID  desplazar e ir al estado 133
+
+    filter_lista_variable  ir al estado 134
+
+
+estado 125
+
+   49 filter_lista_condicion: filter_condicion OP_AND filter_condicion .
+
+    $default  reduce usando la regla 49 (filter_lista_condicion)
+
+
+estado 126
+
+   50 filter_lista_condicion: filter_condicion OP_OR filter_condicion .
+
+    $default  reduce usando la regla 50 (filter_lista_condicion)
+
+
+estado 127
+
+   69 inlist: INLIST PAR_A ID PUNTO_COMA COR_A . lista_expresiones COR_C PAR_C
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion          ir al estado 135
+    termino            ir al estado 55
+    factor             ir al estado 56
+    filter             ir al estado 57
+    lista_expresiones  ir al estado 136
+
+
+estado 128
+
+   41 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C .
+   42         | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C . ELSE LLAVE_A lista_sentencia LLAVE_C
+
+    ELSE  desplazar e ir al estado 137
+
+    $default  reduce usando la regla 41 (decision)
+
+
+estado 129
+
+   15 lista_variable: ID .
+
+    $default  reduce usando la regla 15 (lista_variable)
+
+
+estado 130
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C VAR_ASIG COR_A lista_variable . COR_C PUNTO_COMA
+   14 lista_variable: lista_variable . SEPARADOR ID
+
+    COR_C      desplazar e ir al estado 138
+    SEPARADOR  desplazar e ir al estado 139
+
+
+estado 131
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 140
+
+
+estado 132
+
+   51 filter_lista_condicion: OP_NOT PAR_A filter_condicion PAR_C .
+
+    $default  reduce usando la regla 51 (filter_lista_condicion)
+
+
+estado 133
+
+   56 filter_lista_variable: ID .
+
+    $default  reduce usando la regla 56 (filter_lista_variable)
+
+
+estado 134
+
+   48 filter: FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable . COR_C PAR_C
+   55 filter_lista_variable: filter_lista_variable . SEPARADOR ID
+
+    COR_C      desplazar e ir al estado 141
+    SEPARADOR  desplazar e ir al estado 142
+
+
+estado 135
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   71 lista_expresiones: expresion .
+
+    OP_SUMA   reduce usando la regla 17 ($@4)
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 71 (lista_expresiones)
+
+    $@4  ir al estado 76
+    $@5  ir al estado 77
+
+
+estado 136
+
+   69 inlist: INLIST PAR_A ID PUNTO_COMA COR_A lista_expresiones . COR_C PAR_C
+   70 lista_expresiones: lista_expresiones . PUNTO_COMA expresion
+
+    COR_C       desplazar e ir al estado 143
+    PUNTO_COMA  desplazar e ir al estado 144
+
+
+estado 137
+
+   42 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE . LLAVE_A lista_sentencia LLAVE_C
+
+    LLAVE_A  desplazar e ir al estado 145
+
+
+estado 138
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C VAR_ASIG COR_A lista_variable COR_C . PUNTO_COMA
+
+    PUNTO_COMA  desplazar e ir al estado 146
+
+
+estado 139
+
+   14 lista_variable: lista_variable SEPARADOR . ID
+
+    ID  desplazar e ir al estado 147
+
+
+estado 140
+
+   40 ciclo: REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA .
+
+    $default  reduce usando la regla 40 (ciclo)
+
+
+estado 141
+
+   48 filter: FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C . PAR_C
+
+    PAR_C  desplazar e ir al estado 148
+
+
+estado 142
+
+   55 filter_lista_variable: filter_lista_variable SEPARADOR . ID
+
+    ID  desplazar e ir al estado 149
+
+
+estado 143
+
+   69 inlist: INLIST PAR_A ID PUNTO_COMA COR_A lista_expresiones COR_C . PAR_C
+
+    PAR_C  desplazar e ir al estado 150
+
+
+estado 144
+
+   70 lista_expresiones: lista_expresiones PUNTO_COMA . expresion
+
+    PAR_A     desplazar e ir al estado 48
+    FILTER    desplazar e ir al estado 49
+    ID        desplazar e ir al estado 51
+    CTE_INT   desplazar e ir al estado 52
+    CTE_REAL  desplazar e ir al estado 53
+
+    expresion  ir al estado 151
+    termino    ir al estado 55
+    factor     ir al estado 56
+    filter     ir al estado 57
+
+
+estado 145
+
+   42 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A . lista_sentencia LLAVE_C
+
+    OP_ESC  desplazar e ir al estado 11
+    OP_LEC  desplazar e ir al estado 12
+    REPEAT  desplazar e ir al estado 13
+    IF      desplazar e ir al estado 14
+    ID      desplazar e ir al estado 15
+
+    lista_sentencia  ir al estado 152
+    sentencia        ir al estado 17
+    asignacion       ir al estado 18
+    ciclo            ir al estado 19
+    decision         ir al estado 20
+    escritura        ir al estado 21
+    lectura          ir al estado 22
+
+
+estado 146
+
+    8 sentencia_declaracion: COR_A $@2 lista_tipo_dato $@3 COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA .
+
+    $default  reduce usando la regla 8 (sentencia_declaracion)
+
+
+estado 147
+
+   14 lista_variable: lista_variable SEPARADOR ID .
+
+    $default  reduce usando la regla 14 (lista_variable)
+
+
+estado 148
+
+   48 filter: FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C .
+
+    $default  reduce usando la regla 48 (filter)
+
+
+estado 149
+
+   55 filter_lista_variable: filter_lista_variable SEPARADOR ID .
+
+    $default  reduce usando la regla 55 (filter_lista_variable)
+
+
+estado 150
+
+   69 inlist: INLIST PAR_A ID PUNTO_COMA COR_A lista_expresiones COR_C PAR_C .
+
+    $default  reduce usando la regla 69 (inlist)
+
+
+estado 151
+
+   18 expresion: expresion . $@4 OP_SUMA termino
+   20          | expresion . $@5 OP_RESTA termino
+   70 lista_expresiones: lista_expresiones PUNTO_COMA expresion .
+
+    OP_SUMA   reduce usando la regla 17 ($@4)
+    OP_RESTA  reduce usando la regla 19 ($@5)
+    $default  reduce usando la regla 70 (lista_expresiones)
+
+    $@4  ir al estado 76
+    $@5  ir al estado 77
+
+
+estado 152
+
+   30 lista_sentencia: lista_sentencia . sentencia
+   42 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia . LLAVE_C
+
+    LLAVE_C  desplazar e ir al estado 153
+    OP_ESC   desplazar e ir al estado 11
+    OP_LEC   desplazar e ir al estado 12
+    REPEAT   desplazar e ir al estado 13
+    IF       desplazar e ir al estado 14
+    ID       desplazar e ir al estado 15
+
+    sentencia   ir al estado 35
+    asignacion  ir al estado 18
+    ciclo       ir al estado 19
+    decision    ir al estado 20
+    escritura   ir al estado 21
+    lectura     ir al estado 22
+
+
+estado 153
+
+   42 decision: IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C .
+
+    $default  reduce usando la regla 42 (decision)
