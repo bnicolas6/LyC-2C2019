@@ -9,6 +9,10 @@
 FILE  *yyin;
 char *yyltext;
 char *yytext;
+char tipoActual[10]={""};
+char listaVariables[10][20]={""};
+int variableActual=0;
+void reinicioVariables();
 %}
 
 
@@ -49,8 +53,8 @@ lista_sentencia_declaracion :   lista_sentencia_declaracion sentencia_declaracio
 sentencia_declaracion : COR_A lista_tipo_dato COR_C VAR_ASIG COR_A lista_variable COR_C PUNTO_COMA ;
 
 
-lista_tipo_dato :   lista_tipo_dato SEPARADOR tipo_dato
-                  | tipo_dato
+lista_tipo_dato :   lista_tipo_dato SEPARADOR tipo_dato {guardarTipos(variableActual, listaVariables, tipoActual); reinicioVariables();}
+                  | tipo_dato {guardarTipos(variableActual, listaVariables, tipoActual); reinicioVariables();}
                   ;
 
 tipo_dato :   INT {printf("Tipo de Dato: INT\n");}
@@ -87,9 +91,9 @@ lista_sentencia :  lista_sentencia sentencia
                   ;
 
 
-sentencia :   asignacion	{ printf("Asignación OK\n"); }
+sentencia :   asignacion	{ printf("Asignacion OK\n"); }
             | ciclo		{ printf("Ciclo OK\n"); }
-            | decision		{ printf("Decisión OK\n"); }
+            | decision		{ printf("Decision OK\n"); }
             | escritura		{ printf("Escritura OK\n"); }
             | lectura		{ printf("Lectura OK\n"); }
             ;
@@ -175,10 +179,16 @@ int main(int argc,char *argv[])
   return 0;
 }
 int yyerror(void)
-     {
-       printf("Syntax Error\n");
-	 system ("Pause");
-	 exit (1);
-     }
+{
+	printf("Syntax Error\n");
+	system ("Pause");
+	exit (1);
+}
+     
+void reinicioVariables() 
+{
+	variableActual=0;
+    	strcpy(tipoActual,"");
+}
 
 
