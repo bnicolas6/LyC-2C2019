@@ -17,6 +17,8 @@ ENDVAR
 	{
 		peso = 16;
 		print peso;
+		nombre = "Juan";
+		print "Otro nombre";
 	}
 
 	edad = filter (_<(peso+5) && _>(edad*2), [v1, v2, v3]);
