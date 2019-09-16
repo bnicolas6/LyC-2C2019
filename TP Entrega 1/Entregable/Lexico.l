@@ -205,7 +205,7 @@ int insertarIDEnTS(char *id)
 
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud)
 {
-	if (noExisteEnTS(nombre))
+	if (noExisteEnTS(nombre)==-1)
 	{
 		//printf("INSERTANDO: ********** | %s | %s | %s | %s | **********\n", nombre, tipo, valor, longitud);
 		struct renglonTS renglon;
