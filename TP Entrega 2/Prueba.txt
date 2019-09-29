@@ -7,5 +7,10 @@ VAR
 ENDVAR
 --/ Así son los comentarios en el 2°Cuat de LyC --/ Año 2019 /-- /--
 {
-	v1 = 2.3 + v2 * v3;
+	IF(v1 < 3 && v2 >= 7){
+		v2 = v1 + v3 * 4 ;
+	}
+	ELSE{
+		v2 = 3;
+	}
 }

@@ -6,15 +6,30 @@
 #include <string.h>
 #include "y.tab.h"
 
-
-typedef struct s_nodo
-{
+typedef struct{
+    
+    int posicion;
     char *elemento;
-    struct s_nodo *siguiente;
 }
-t_nodo;
+t_info;
 
-typedef t_nodo *t_lista;
+typedef struct s_nodo_lista{
+    
+    t_info info;
+    struct s_nodo_lista *siguiente;
+}
+t_nodo_lista;
+
+typedef struct s_nodo_pila{
+    
+    int posicion;
+    struct s_nodo_pila *siguiente;
+}
+t_nodo_pila;
+
+
+typedef t_nodo_lista *t_lista;
+typedef t_nodo_pila *t_pila;
 
 
 FILE  *yyin;
@@ -23,17 +38,67 @@ char *yytext;
 char tipoActual[10]={""};
 char listaVariables[10][20]={""};
 int variableActual=0;
+
+
 t_lista lista;
+t_pila pila_IF;
+t_pila pila_REPEAT;
+t_pila pila_FILTER;
+t_pila pila_INLIST;
+char tipo_salto[10];
+int posicion_inicial_polaca = 1;
+int condicion_AND = 0;
 
-
+/*FUNCIONES POLACA - PRINCIPALES*/
 
 void crear_lista (t_lista *lista);
 void insertar_polaca_int(t_lista *lista, int elemento);
 void insertar_polaca_real(t_lista *lista, float elemento);
 void insertar_polaca(t_lista *lista, char *elemento);
-void mostrar_polaca(t_lista *lista);
 void guardar_polaca(t_lista *lista);
+void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta);
+void avanzar();
+
+/*FUNCIONES POLACAS - AUXILIARES*/
+
+void mostrar_polaca(t_lista *lista);
 void liberar_memoria(t_lista *lista);
+char *integer_to_string(int integer);
+char *invertir_salto(char *salto);
+int decision_AND_detectada();
+
+
+
+/*FUNCIONES PILA*/
+
+void crear_pila(t_pila *pila);
+void apilar(t_pila *pila, t_lista *lista);
+int desapilar(t_pila *pila);
+
+/*Pila - IF*/
+
+void crear_pila_IF(t_pila *pila);
+void apilar_IF (t_pila *pila, t_lista *lista);
+int desapilar_IF (t_pila *pila);
+
+
+/*Pila - REPEAT*/
+
+void crear_pila_REPEAT(t_pila *pila);
+void apilar_REPEAT(t_pila *pila, t_lista *lista);
+int desapilar_REPEAT(t_pila *pila);
+
+/*Pila - FILTER*/
+
+void crear_pila_FILTER(t_pila *pila);
+void apilar_FILTER(t_pila *pila, t_lista *lista);
+int desapilar_FILTER(t_pila *pila);
+
+/*Pila - INLIST*/
+
+void crear_pila_INLIST(t_pila *pila);
+void apilar_INLIST(t_pila *pila, t_lista *lista);
+int desapilar_INLIST(t_pila *pila);
 
 %}
 
@@ -61,7 +126,7 @@ char *strVal;
 %token IF ELSE 
 %%
 
-start : declaracion programa { guardar_polaca(&lista); };
+start : declaracion programa { guardar_polaca(&lista); liberar_memoria(&lista); };
 
 declaracion : VAR_INI lista_sentencia_declaracion VAR_FIN ;
 
@@ -118,15 +183,31 @@ sentencia :   asignacion
             ;
 //Revisar: No funciona con CTE_STRING
 asignacion :   ID  OP_ASIG { insertar_polaca(&lista, $1); } expresion PUNTO_COMA { insertar_polaca(&lista, "="); }
-             | ID  OP_ASIG { insertar_polaca(&lista, $1); } CTE_STRING { insertar_polaca(&lista, $3); } PUNTO_COMA { insertar_polaca(&lista, "="); }
+             | ID  OP_ASIG { insertar_polaca(&lista, $1); } CTE_STRING PUNTO_COMA { insertar_polaca(&lista, "="); }
              ;
 
 
 ciclo : REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA ;
 
 
-decision :   IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C
-           | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE LLAVE_A lista_sentencia LLAVE_C
+decision :   IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C {
+                                                                              agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca);
+                                                                              if(decision_AND_detectada() == 1){
+                                                                                agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca);
+                                                                                condicion_AND = 0;
+                                                                              } 
+                                                                            }
+           | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE  { 
+                                                                                    insertar_polaca(&lista, "BI");
+                                                                                    agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca+1);
+                                                                                    if(decision_AND_detectada() == 1){
+                                                                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca+1);
+                                                                                      condicion_AND = 0;
+                                                                                    }
+                                                                                    apilar_IF(&pila_IF, &lista);
+                                                                                    avanzar();
+                                                                                  } 
+             LLAVE_A lista_sentencia LLAVE_C { agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca); }
            ;
 
 escritura :   OP_ESC ID PUNTO_COMA
@@ -159,23 +240,61 @@ filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipo
                         ;
 
 
-lista_condicion :   condicion OP_AND condicion
-                  | condicion OP_OR condicion
-                  | OP_NOT PAR_A condicion PAR_C
-                  | condicion
+lista_condicion :   condicion { 
+                                insertar_polaca(&lista, "CMP");
+                                insertar_polaca(&lista, tipo_salto);
+                                apilar_IF(&pila_IF, &lista); 
+                                avanzar();
+                                //mostrar_polaca(&lista);
+                              }
+                    OP_AND condicion { 
+                                      //mostrar_polaca(&lista);
+                                      insertar_polaca(&lista, "CMP");
+                                      insertar_polaca(&lista, tipo_salto); 
+                                      apilar_IF(&pila_IF, &lista); 
+                                      avanzar();
+                                      condicion_AND = 1;      
+                                     }
+                  | condicion { 
+                                insertar_polaca(&lista, "CMP"); 
+                                insertar_polaca(&lista, invertir_salto(tipo_salto)); 
+                                apilar_IF(&pila_IF, &lista); 
+                                avanzar(); 
+                              } 
+                    OP_OR condicion {
+                                      insertar_polaca(&lista, "CMP"); 
+                                      insertar_polaca(&lista, tipo_salto);
+                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca+1);
+                                      apilar_IF(&pila_IF, &lista);
+                                      avanzar();
+                                    }
+
+                  | OP_NOT PAR_A condicion PAR_C  { 
+                                                    insertar_polaca(&lista, "CMP"); 
+                                                    insertar_polaca(&lista, invertir_salto(tipo_salto)); 
+                                                    apilar_IF(&pila_IF, &lista); 
+                                                    avanzar(); 
+                                                  }
+
+                  | condicion { 
+                                insertar_polaca(&lista, "CMP"); 
+                                insertar_polaca(&lista, tipo_salto); 
+                                apilar_IF(&pila_IF, &lista); 
+                                avanzar(); 
+                              }
                   ;
 
 condicion :   expresion comparacion expresion
             | inlist
             ;
 
-
-comparacion :   OP_MAYOR
-              | OP_MENOR
-              | OP_MAYOR_IGUAL
-              | OP_MENOR_IGUAL
-              | OP_IGUAL
-              | OP_DISTINTO
+//char tipo_salto[10]; strncpy(tipo_salto, "BLE", 100);
+comparacion :   OP_MAYOR { strncpy(tipo_salto, "BLE", 10); }
+              | OP_MENOR { strncpy(tipo_salto, "BGE", 10); }
+              | OP_MAYOR_IGUAL { strncpy(tipo_salto, "BLT", 10); }
+              | OP_MENOR_IGUAL { strncpy(tipo_salto, "BGT", 10); }
+              | OP_IGUAL { strncpy(tipo_salto, "BNE", 10); }
+              | OP_DISTINTO { strncpy(tipo_salto, "BEQ", 10); }
               ;
 
 
@@ -198,6 +317,10 @@ int main(int argc,char *argv[])
 	yyparse();
   	guardarRenglonesEnTS();
   	crear_lista(&lista);
+    crear_pila_IF(&pila_IF);
+    crear_pila_REPEAT(&pila_REPEAT);
+    crear_pila_FILTER(&pila_FILTER);
+    crear_pila_INLIST(&pila_INLIST);
   }
   fclose(yyin);
   return 0;
@@ -209,21 +332,42 @@ int yyerror(void){
 	exit (1);
 }
 
+/*FUNCIONES POLACA - PRINCIPALES*/
+
 void crear_lista(t_lista *lista){
+    
     *lista = NULL;
 }
 
+void insertar_polaca_int(t_lista *lista, int elemento){
+	
+	char *toString = (char *)malloc(sizeof(int));
+	itoa(elemento, toString, 10);
+	insertar_polaca(lista, toString);
+}
+
+void insertar_polaca_real(t_lista *lista, float elemento){
+	
+	char *toString = (char *)malloc(sizeof(float));
+	snprintf(toString, sizeof(float), "%e%f", elemento);
+	insertar_polaca(lista, toString);
+	
+}
+
 void insertar_polaca(t_lista *lista, char *elemento){
-    t_nodo *nuevo = (t_nodo *)malloc(sizeof (t_nodo));
+    
+    t_nodo_lista *nuevo = (t_nodo_lista *)malloc(sizeof (t_nodo_lista));
     if (!nuevo)
         exit(1);
 
-    nuevo->elemento = (char *)malloc(strlen(elemento)*sizeof(char));
-    if(!nuevo->elemento){
+    nuevo->info.elemento = (char *)malloc(strlen(elemento)*sizeof(char));
+    if(!nuevo->info.elemento){
         exit(1);
     }
 
-    nuevo->elemento = elemento;
+    //nuevo->info.elemento = elemento;
+    strcpy(nuevo->info.elemento, elemento);
+    nuevo->info.posicion = posicion_inicial_polaca++;
 
     while (*lista)
         lista = &(*lista)->siguiente;
@@ -232,49 +376,154 @@ void insertar_polaca(t_lista *lista, char *elemento){
     nuevo->siguiente = NULL;
 }
 
-void insertar_polaca_int(t_lista *lista, int elemento){
-	char *toString = (char *)malloc(sizeof(int));
-	itoa(elemento, toString, 10);
-	insertar_polaca(lista, toString);
-}
-
-void insertar_polaca_real(t_lista *lista, float elemento){
-	char *toString = (char *)malloc(sizeof(float));
-	snprintf(toString, sizeof(float), "%e%f", elemento);
-	insertar_polaca(lista, toString);
-	
-}
-
-void mostrar_polaca(t_lista *lista){
-     while (*lista){
-        printf ("%s\n", (*lista)->elemento);
-        lista = &(*lista)->siguiente;
-    }
-}
-
 void guardar_polaca(t_lista *lista){
-    FILE * file = fopen("intermedia.txt", "w");
-
-	if(file == NULL)
-	{
-    	printf("(!) ERROR: No se pudo abrir el txt correspondiente al codigo intermedio\n");
-	}
-	else
-	{
-	    while(*lista){
-            fprintf(file, "%s ", (*lista)->elemento);
+    
+  FILE * file = fopen("intermedia.txt", "w");
+  if(file == NULL){
+      printf("(!) ERROR: No se pudo abrir el txt correspondiente al codigo intermedio\n");
+  }
+  else{
+      while(*lista){
+            fprintf(file, "%s ", (*lista)->info.elemento);
             lista = &(*lista)->siguiente;
-	    }
-		fclose(file);
-	}
+      }
+    fclose(file);
+  }
+}
+
+void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta){
+
+    while(*lista && (*lista)->info.posicion != posicion_desde)
+        lista = &(*lista)->siguiente;
+
+    (*lista)->info.elemento = integer_to_string(posicion_hasta);
+}
+
+void avanzar(){
+  
+  posicion_inicial_polaca++;
+}
+
+/*FUNCIONES POLACA - AUXILIARES*/
+void mostrar_polaca(t_lista *lista){
+     
+  while (*lista){
+    printf ("Posicion:%d Elemento: %s\n", (*lista)->info.posicion, (*lista)->info.elemento);
+    lista = &(*lista)->siguiente;
+  }
 }
 
 void liberar_memoria(t_lista *lista){
-    t_nodo *aux;
+    
+    t_nodo_lista *aux;
     while(*lista){
         aux = *lista;
         *lista = aux->siguiente;
-        free(aux->elemento);
+        free(aux->info.elemento);
         free(aux);
     }
 }
+
+char* integer_to_string(int x){
+
+    char* buffer = malloc(sizeof(char) * sizeof(int) * 4 + 1);
+    if (buffer)
+         sprintf(buffer, "%d", x);
+
+    return buffer;
+}
+
+char *invertir_salto(char *salto){
+  
+  if(strncmp("BLE", salto, 10) == 0){
+    return "BGT";
+  }
+  if(strncmp("BGE", salto, 10) == 0){
+    return "BLT";
+  }
+  if(strncmp("BLT", salto, 10) == 0){
+    return "BGE";
+  }
+  if(strncmp("BGT", salto, 10) == 0){
+    return "BLE";
+  }
+  if(strncmp("BNE", salto, 10) == 0){
+    return "BEQ";
+  }
+  if(strncmp("BEQ", salto, 10) == 0){
+    return "BNE";
+  }
+}
+
+int decision_AND_detectada(){
+  return condicion_AND;
+}
+
+/*FUNCIONES PILA*/
+
+void crear_pila(t_pila *pila){
+	
+	*pila = NULL;
+}
+	 
+void apilar(t_pila *pila, t_lista *lista){
+	
+  t_nodo_lista *nuevo_nodo_lista = (t_nodo_lista *)malloc(sizeof (t_nodo_lista));
+  t_nodo_pila *nuevo_nodo_pila = (t_nodo_pila *)malloc(sizeof (t_nodo_pila));
+
+  if(!nuevo_nodo_lista || !nuevo_nodo_pila)
+      exit(1);
+
+  nuevo_nodo_lista->info.posicion = posicion_inicial_polaca;
+  nuevo_nodo_lista->siguiente = NULL;
+
+  while (*lista)
+    lista = &(*lista)->siguiente;
+
+  *lista = nuevo_nodo_lista;
+
+  nuevo_nodo_pila->posicion = posicion_inicial_polaca;
+  nuevo_nodo_pila->siguiente = *pila;
+  *pila = nuevo_nodo_pila;     
+}
+
+int desapilar(t_pila *pila){
+
+  t_nodo_pila *nodo_aux;
+  int posicion = 0;
+
+  if (*pila == NULL)
+      exit(1);
+
+  nodo_aux = *pila;
+  posicion = nodo_aux->posicion;
+  *pila = nodo_aux->siguiente;
+  free(nodo_aux);
+
+  return posicion;
+}
+
+/*Pila - IF*/
+
+void crear_pila_IF(t_pila *pila){ crear_pila(pila); }
+void apilar_IF (t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+int desapilar_IF (t_pila *pila){ desapilar(pila); }
+
+
+/*Pila - REPEAT*/
+
+void crear_pila_REPEAT(t_pila *pila){ crear_pila(pila); }
+void apilar_REPEAT(t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+int desapilar_REPEAT(t_pila *pila){ desapilar(pila); }
+
+/*Pila - FILTER*/
+
+void crear_pila_FILTER(t_pila *pila){ crear_pila(pila); }
+void apilar_FILTER(t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+int desapilar_FILTER(t_pila *pila){ desapilar(pila); }
+
+/*Pila - INLIST*/
+
+void crear_pila_INLIST(t_pila *pila){ crear_pila(pila); }
+void apilar_INLIST(t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+int desapilar_INLIST(t_pila *pila){ desapilar(pila); }

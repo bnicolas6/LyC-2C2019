@@ -6,4 +6,6 @@ nombre         		 INT            		 -              	 -
 v1             		 INT            		 -              	 -              
 v2             		 INT            		 -              	 -              
 v4             		 FLOAT          		 -              	 -              
-_2.3           		 CTE_REAL       		 2.3            	 -              
+_3             		 CTE_INT        		 3              	 -              
+_7             		 CTE_INT        		 7              	 -              
+_4             		 CTE_INT        		 4              	 -              
