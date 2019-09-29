@@ -46,7 +46,7 @@ t_pila pila_REPEAT;
 t_pila pila_FILTER;
 t_pila pila_INLIST;
 char tipo_salto[10];
-int posicion_inicial_polaca = 1;
+int posicion_polaca = 1;
 int condicion_AND = 0;
 
 /*FUNCIONES POLACA - PRINCIPALES*/
@@ -55,6 +55,7 @@ void crear_lista (t_lista *lista);
 void insertar_polaca_int(t_lista *lista, int elemento);
 void insertar_polaca_real(t_lista *lista, float elemento);
 void insertar_polaca(t_lista *lista, char *elemento);
+void insertar_espacio_polaca(t_lista *lista);
 void guardar_polaca(t_lista *lista);
 void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta);
 void avanzar();
@@ -72,32 +73,32 @@ int decision_AND_detectada();
 /*FUNCIONES PILA*/
 
 void crear_pila(t_pila *pila);
-void apilar(t_pila *pila, t_lista *lista);
+void apilar(t_pila *pila);
 int desapilar(t_pila *pila);
 
 /*Pila - IF*/
 
 void crear_pila_IF(t_pila *pila);
-void apilar_IF (t_pila *pila, t_lista *lista);
+void apilar_IF (t_pila *pila);
 int desapilar_IF (t_pila *pila);
 
 
 /*Pila - REPEAT*/
 
 void crear_pila_REPEAT(t_pila *pila);
-void apilar_REPEAT(t_pila *pila, t_lista *lista);
+void apilar_REPEAT(t_pila *pila);
 int desapilar_REPEAT(t_pila *pila);
 
 /*Pila - FILTER*/
 
 void crear_pila_FILTER(t_pila *pila);
-void apilar_FILTER(t_pila *pila, t_lista *lista);
+void apilar_FILTER(t_pila *pila);
 int desapilar_FILTER(t_pila *pila);
 
 /*Pila - INLIST*/
 
 void crear_pila_INLIST(t_pila *pila);
-void apilar_INLIST(t_pila *pila, t_lista *lista);
+void apilar_INLIST(t_pila *pila);
 int desapilar_INLIST(t_pila *pila);
 
 %}
@@ -182,32 +183,42 @@ sentencia :   asignacion
             | lectura
             ;
 //Revisar: No funciona con CTE_STRING
-asignacion :   ID  OP_ASIG { insertar_polaca(&lista, $1); } expresion PUNTO_COMA { insertar_polaca(&lista, "="); }
+asignacion :   ID  OP_ASIG { insertar_polaca(&lista, $1);  } expresion PUNTO_COMA { insertar_polaca(&lista, "="); }
              | ID  OP_ASIG { insertar_polaca(&lista, $1); } CTE_STRING PUNTO_COMA { insertar_polaca(&lista, "="); }
              ;
 
 
-ciclo : REPEAT LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA ;
+ciclo : REPEAT {apilar_REPEAT(&pila_REPEAT); } 
+        LLAVE_A lista_sentencia LLAVE_C UNTIL PAR_A lista_condicion PAR_C PUNTO_COMA {
+                                                                                        insertar_polaca(&lista, "BI");
+                                                                                        insertar_polaca_int(&lista, desapilar_REPEAT(&pila_REPEAT));
+                                                                                        agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca);
+                                                                                        if(decision_AND_detectada() == 1){
+                                                                                          agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca);
+                                                                                          condicion_AND = 0;
+                                                                                        }
+                                                                                     };
 
 
 decision :   IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C {
-                                                                              agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca);
+                                                                              agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca);
                                                                               if(decision_AND_detectada() == 1){
-                                                                                agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca);
+                                                                                agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca);
                                                                                 condicion_AND = 0;
                                                                               } 
                                                                             }
            | IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C ELSE  { 
                                                                                     insertar_polaca(&lista, "BI");
-                                                                                    agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca+1);
+                                                                                    agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca+1);
                                                                                     if(decision_AND_detectada() == 1){
-                                                                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca+1);
+                                                                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca+1);
                                                                                       condicion_AND = 0;
                                                                                     }
-                                                                                    apilar_IF(&pila_IF, &lista);
+                                                                                    apilar_IF(&pila_IF);
+                                                                                    insertar_espacio_polaca(&lista);
                                                                                     avanzar();
                                                                                   } 
-             LLAVE_A lista_sentencia LLAVE_C { agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca); }
+             LLAVE_A lista_sentencia LLAVE_C { agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca); }
            ;
 
 escritura :   OP_ESC ID PUNTO_COMA
@@ -243,43 +254,47 @@ filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipo
 lista_condicion :   condicion { 
                                 insertar_polaca(&lista, "CMP");
                                 insertar_polaca(&lista, tipo_salto);
-                                apilar_IF(&pila_IF, &lista); 
+                                apilar_IF(&pila_IF);
+                                insertar_espacio_polaca(&lista);
                                 avanzar();
-                                //mostrar_polaca(&lista);
                               }
                     OP_AND condicion { 
-                                      //mostrar_polaca(&lista);
                                       insertar_polaca(&lista, "CMP");
                                       insertar_polaca(&lista, tipo_salto); 
-                                      apilar_IF(&pila_IF, &lista); 
+                                      apilar_IF(&pila_IF);
+                                      insertar_espacio_polaca(&lista); 
                                       avanzar();
                                       condicion_AND = 1;      
                                      }
                   | condicion { 
                                 insertar_polaca(&lista, "CMP"); 
                                 insertar_polaca(&lista, invertir_salto(tipo_salto)); 
-                                apilar_IF(&pila_IF, &lista); 
+                                apilar_IF(&pila_IF);
+                                insertar_espacio_polaca(&lista); 
                                 avanzar(); 
                               } 
                     OP_OR condicion {
                                       insertar_polaca(&lista, "CMP"); 
                                       insertar_polaca(&lista, tipo_salto);
-                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_inicial_polaca+1);
-                                      apilar_IF(&pila_IF, &lista);
+                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca+1);
+                                      apilar_IF(&pila_IF);
+                                      insertar_espacio_polaca(&lista);
                                       avanzar();
                                     }
 
                   | OP_NOT PAR_A condicion PAR_C  { 
                                                     insertar_polaca(&lista, "CMP"); 
                                                     insertar_polaca(&lista, invertir_salto(tipo_salto)); 
-                                                    apilar_IF(&pila_IF, &lista); 
+                                                    apilar_IF(&pila_IF);
+                                                    insertar_espacio_polaca(&lista); 
                                                     avanzar(); 
                                                   }
 
                   | condicion { 
                                 insertar_polaca(&lista, "CMP"); 
                                 insertar_polaca(&lista, tipo_salto); 
-                                apilar_IF(&pila_IF, &lista); 
+                                apilar_IF(&pila_IF);
+                                insertar_espacio_polaca(&lista); 
                                 avanzar(); 
                               }
                   ;
@@ -367,7 +382,7 @@ void insertar_polaca(t_lista *lista, char *elemento){
 
     //nuevo->info.elemento = elemento;
     strcpy(nuevo->info.elemento, elemento);
-    nuevo->info.posicion = posicion_inicial_polaca++;
+    nuevo->info.posicion = posicion_polaca++;
 
     while (*lista)
         lista = &(*lista)->siguiente;
@@ -401,7 +416,7 @@ void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta){
 
 void avanzar(){
   
-  posicion_inicial_polaca++;
+  posicion_polaca++;
 }
 
 /*FUNCIONES POLACA - AUXILIARES*/
@@ -465,24 +480,29 @@ void crear_pila(t_pila *pila){
 	
 	*pila = NULL;
 }
-	 
-void apilar(t_pila *pila, t_lista *lista){
-	
-  t_nodo_lista *nuevo_nodo_lista = (t_nodo_lista *)malloc(sizeof (t_nodo_lista));
-  t_nodo_pila *nuevo_nodo_pila = (t_nodo_pila *)malloc(sizeof (t_nodo_pila));
 
-  if(!nuevo_nodo_lista || !nuevo_nodo_pila)
+void insertar_espacio_polaca(t_lista *lista){
+  
+  t_nodo_lista *nuevo_nodo_lista = (t_nodo_lista *)malloc(sizeof (t_nodo_lista));
+  if(!nuevo_nodo_lista)
       exit(1);
 
-  nuevo_nodo_lista->info.posicion = posicion_inicial_polaca;
+  nuevo_nodo_lista->info.posicion = posicion_polaca;
   nuevo_nodo_lista->siguiente = NULL;
 
   while (*lista)
     lista = &(*lista)->siguiente;
 
   *lista = nuevo_nodo_lista;
+}
+	 
+void apilar(t_pila *pila){
+	
+  t_nodo_pila *nuevo_nodo_pila = (t_nodo_pila *)malloc(sizeof (t_nodo_pila));
+  if(!nuevo_nodo_pila)
+      exit(1);
 
-  nuevo_nodo_pila->posicion = posicion_inicial_polaca;
+  nuevo_nodo_pila->posicion = posicion_polaca;
   nuevo_nodo_pila->siguiente = *pila;
   *pila = nuevo_nodo_pila;     
 }
@@ -506,24 +526,23 @@ int desapilar(t_pila *pila){
 /*Pila - IF*/
 
 void crear_pila_IF(t_pila *pila){ crear_pila(pila); }
-void apilar_IF (t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+void apilar_IF (t_pila *pila){ apilar(pila); }
 int desapilar_IF (t_pila *pila){ desapilar(pila); }
-
 
 /*Pila - REPEAT*/
 
 void crear_pila_REPEAT(t_pila *pila){ crear_pila(pila); }
-void apilar_REPEAT(t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+void apilar_REPEAT(t_pila *pila){ apilar(pila); }
 int desapilar_REPEAT(t_pila *pila){ desapilar(pila); }
 
 /*Pila - FILTER*/
 
 void crear_pila_FILTER(t_pila *pila){ crear_pila(pila); }
-void apilar_FILTER(t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+void apilar_FILTER(t_pila *pila){ apilar(pila); }
 int desapilar_FILTER(t_pila *pila){ desapilar(pila); }
 
 /*Pila - INLIST*/
 
 void crear_pila_INLIST(t_pila *pila){ crear_pila(pila); }
-void apilar_INLIST(t_pila *pila, t_lista *lista){ apilar(pila, lista); }
+void apilar_INLIST(t_pila *pila){ apilar(pila); }
 int desapilar_INLIST(t_pila *pila){ desapilar(pila); }
