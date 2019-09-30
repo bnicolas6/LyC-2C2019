@@ -183,8 +183,8 @@ sentencia :   asignacion
             | lectura
             ;
 //Revisar: No funciona con CTE_STRING
-asignacion :   ID  OP_ASIG { insertar_polaca(&lista, $1);  } expresion PUNTO_COMA { insertar_polaca(&lista, "="); }
-             | ID  OP_ASIG { insertar_polaca(&lista, $1); } CTE_STRING PUNTO_COMA { insertar_polaca(&lista, "="); }
+asignacion :   ID  OP_ASIG expresion PUNTO_COMA { insertar_polaca(&lista, $1); insertar_polaca(&lista, "="); }
+             | ID  OP_ASIG CTE_STRING PUNTO_COMA { insertar_polaca(&lista, $1); insertar_polaca(&lista, "="); }
              ;
 
 
@@ -303,7 +303,6 @@ condicion :   expresion comparacion expresion
             | inlist
             ;
 
-//char tipo_salto[10]; strncpy(tipo_salto, "BLE", 100);
 comparacion :   OP_MAYOR { strncpy(tipo_salto, "BLE", 10); }
               | OP_MENOR { strncpy(tipo_salto, "BGE", 10); }
               | OP_MAYOR_IGUAL { strncpy(tipo_salto, "BLT", 10); }

@@ -1,0 +1,5 @@
+Dudas:
+-Que ocurre con las sentencias PRINT y READ al armar la polaca inversa?
+-Problemas cuando se hace id = CTE_STRING: no puedo obtener el valor de la constante con yyval (tal vez probe mal, no intente buscando en la TS)
+-En que momento se valida el tipo de datos? Por ej: v1 declarada como int, pero luego en una asignacion aparece "v1 = 15.2"
+-Division por 0? Poner un mensaje, ignorarlo... que hacer?
