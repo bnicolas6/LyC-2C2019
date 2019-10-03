@@ -43,11 +43,26 @@ int variableActual=0;
 t_lista lista;
 t_pila pila_IF;
 t_pila pila_REPEAT;
-t_pila pila_FILTER;
 t_pila pila_INLIST;
+
+t_pila pila_FILTER;
+t_pila pila_ESPECIAL;
+
+t_pila pila_FILTER_1;
+t_pila pila_FILTER_2;
+t_pila pila_FILTER_3;
+
 char tipo_salto[10];
 int posicion_polaca = 1;
-int condicion_AND = 0;
+int condicion_AND = 0; 
+//Cuando tengo una condicion AND, sea falso el lado izquierdo o el lado derecho, 
+//hay que saltar a la misma posicion y necesito escribir el mismo valor en 2 posiciones
+//con esta variable es 1, se que tengo que desapilar otra vez mas para escribir el mismo valor
+
+int filter_numero_variable = 0;
+//Para hacer filter se utiliza una variable auxiliar, y como va a la TS y como no  hay limite de sentencias filter
+//que se pueden usar (sean anidadas o no) creo una variable auxiliar: "aux_'filter_numero_variable'", para que
+//siempre sea diferente, y no haya problemas al momento de guardarla en la TS.
 
 /*FUNCIONES POLACA - PRINCIPALES*/
 
@@ -58,6 +73,7 @@ void insertar_polaca(t_lista *lista, char *elemento);
 void insertar_espacio_polaca(t_lista *lista);
 void guardar_polaca(t_lista *lista);
 void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta);
+void escribir_posicion(t_lista *lista, int posicion_desde, char *elemento);
 void avanzar();
 
 /*FUNCIONES POLACAS - AUXILIARES*/
@@ -68,7 +84,12 @@ char *integer_to_string(int integer);
 char *invertir_salto(char *salto);
 int decision_AND_detectada();
 
+char *concat_string_int(char *string, int entero);
 
+void while_agregar_salto(t_lista *lista, t_pila *pila, int posicion_hasta);
+void while_escribir_posicion(t_lista *lista, t_pila *pila, char *elemento);
+
+int cant_variables = 0;
 
 /*FUNCIONES PILA*/
 
@@ -167,7 +188,7 @@ termino :   termino OP_MULT factor { insertar_polaca(&lista, "*"); }
 factor :    ID { insertar_polaca(&lista, $1); }
           | CTE_INT { insertar_polaca_int(&lista, $1); }
           | CTE_REAL { insertar_polaca_real(&lista, $1); }
-          | filter
+          | filter { insertar_polaca(&lista, concat_string_int("aux", filter_numero_variable)); }
           | PAR_A expresion PAR_C
           ;
 
@@ -233,21 +254,100 @@ lectura : OP_LEC ID PUNTO_COMA ;
 
 
 
-filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+filter : FILTER PAR_A filter_lista_condicion { 
+                                              filter_numero_variable++;     
+                                              insertar_polaca(&lista, concat_string_int("aux", filter_numero_variable));
+                                              apilar(&pila_FILTER_2);
+                                              insertar_espacio_polaca(&lista);
+                                              avanzar();  
+                                              insertar_polaca(&lista, "=");
+                                              insertar_polaca(&lista, "BI");
+                                              agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_1), posicion_polaca+1);
 
-filter_lista_condicion :  filter_condicion OP_AND filter_condicion
-                        | filter_condicion OP_OR filter_condicion
+                                              if(decision_AND_detectada() == 1){
+                                                agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_1), posicion_polaca+1);
+                                                condicion_AND = 0;
+                                              }
+                                              mostrar_polaca(&lista);
+                                              apilar_FILTER(&pila_FILTER_3);
+                                              insertar_espacio_polaca(&lista);
+                                              avanzar();
+                                              //insertar_polaca_int(&lista, filter_numero_variable);
+                                              //mostrar_polaca(&lista);
+                      
+                                             } SEPARADOR COR_A filter_lista_variable {
+                                                                                        insertar_polaca(&lista, concat_string_int("aux", filter_numero_variable));
+                                                                                        insertar_polaca_int(&lista, 0);
+                                                                                        insertar_polaca(&lista, "=");                                                   
+                                                                                        //agregar_salto(&lista, desapilar_REPEAT(&pila_FILTER_3), posicion_polaca); //Esto tiene que ser un While
+                                                                                        while_agregar_salto(&lista, &pila_FILTER_3, posicion_polaca);  
+                                                                                        
+
+
+                                              } COR_C PAR_C
+
+filter_lista_condicion :  filter_condicion {
+                                             insertar_polaca(&lista, "CMP");
+                                             insertar_polaca(&lista, tipo_salto);
+                                             mostrar_polaca(&lista);
+                                             apilar_FILTER(&pila_FILTER_1); 
+                                             insertar_espacio_polaca(&lista);
+                                             avanzar();
+                                          } 
+                                          OP_AND filter_condicion{
+                                                                    insertar_polaca(&lista, "CMP");
+                                                                    insertar_polaca(&lista, tipo_salto); 
+                                                                    apilar_FILTER(&pila_FILTER_1);
+                                                                    insertar_espacio_polaca(&lista); 
+                                                                    avanzar();
+                                                                    condicion_AND = 1;
+                                                                    cant_variables = 3; 
+                                                                  }
+                        | filter_condicion {
+                                            insertar_polaca(&lista, "CMP");
+                                            insertar_polaca(&lista, invertir_salto(tipo_salto));
+                                            mostrar_polaca(&lista);
+                                            apilar_FILTER(&pila_FILTER_1); 
+                                            insertar_espacio_polaca(&lista);
+                                            avanzar();
+                                           } OP_OR filter_condicion {
+                                                                      insertar_polaca(&lista, "CMP"); 
+                                                                      insertar_polaca(&lista, tipo_salto);
+                                                                      agregar_salto(&lista, desapilar_REPEAT(&pila_FILTER_1), posicion_polaca+1);
+                                                                      apilar_FILTER(&pila_FILTER_1);
+                                                                      insertar_espacio_polaca(&lista);
+                                                                      avanzar();
+                                                                      cant_variables = 3;
+                                                                    }
                         | OP_NOT PAR_A filter_condicion PAR_C
-                        | filter_condicion 
+                        | filter_condicion {
+                                            insertar_polaca(&lista, "CMP"); 
+                                            insertar_polaca(&lista, tipo_salto); 
+                                            apilar_FILTER(&pila_FILTER_1); 
+                                            insertar_espacio_polaca(&lista);
+                                            avanzar();
+                                            cant_variables = 2;
+                                           }
                         ;
 
 
-filter_condicion :    GUION_BAJO comparacion expresion
-                    | expresion comparacion GUION_BAJO
+filter_condicion :    GUION_BAJO { 
+                                  apilar(&pila_FILTER_2);
+                                  insertar_espacio_polaca(&lista);
+                                  avanzar();
+                                 } comparacion expresion
+                    | expresion comparacion GUION_BAJO { 
+                                                        apilar(&pila_FILTER_2);
+                                                        insertar_espacio_polaca(&lista);
+                                                        avanzar();  
+                                                      }
                     ;
 
 filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipoVariable(yylval.strVal); }
-                        | ID {filter_validarTipoVariable(yylval.strVal); }
+                        | ID {
+                              filter_validarTipoVariable(yylval.strVal);
+                              while_escribir_posicion(&lista, &pila_FILTER_2, yylval.strVal);  
+                             }
                         ;
 
 
@@ -333,8 +433,19 @@ int main(int argc,char *argv[])
   	crear_lista(&lista);
     crear_pila_IF(&pila_IF);
     crear_pila_REPEAT(&pila_REPEAT);
-    crear_pila_FILTER(&pila_FILTER);
     crear_pila_INLIST(&pila_INLIST);
+/*
+  t_pila pila_FILTER_1;
+  t_pila pila_FILTER_2;
+  t_pila pila_FILTER_3;
+*/
+    crear_pila_FILTER(&pila_FILTER);
+    crear_pila_FILTER(&pila_ESPECIAL);
+
+    crear_pila_FILTER(&pila_FILTER_1);
+    crear_pila_FILTER(&pila_FILTER_2);
+    crear_pila_FILTER(&pila_FILTER_3);
+
   }
   fclose(yyin);
   return 0;
@@ -358,6 +469,16 @@ void insertar_polaca_int(t_lista *lista, int elemento){
 	char *toString = (char *)malloc(sizeof(int));
 	itoa(elemento, toString, 10);
 	insertar_polaca(lista, toString);
+}
+
+char *concat_string_int(char *string, int entero){ //REFACTOR
+  char *newString = (char *)malloc(10*sizeof(char));
+  char *toString = (char *)malloc(sizeof(int));
+  itoa(entero, toString, 10);
+  strcpy(newString, "aux_");
+  strcat(newString, toString);
+
+  return newString;
 }
 
 void insertar_polaca_real(t_lista *lista, float elemento){
@@ -405,13 +526,42 @@ void guardar_polaca(t_lista *lista){
   }
 }
 
-void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta){
+void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta){ //REFACTOR
 
     while(*lista && (*lista)->info.posicion != posicion_desde)
         lista = &(*lista)->siguiente;
 
     (*lista)->info.elemento = integer_to_string(posicion_hasta);
 }
+
+void while_agregar_salto(t_lista *lista, t_pila *pila, int posicion_hasta){
+
+    while(*pila){
+      agregar_salto(lista, desapilar_REPEAT(pila), posicion_hasta);
+    }
+}
+
+void escribir_posicion(t_lista *lista, int posicion_desde, char *elemento){ //REFACTOR
+    
+    while(*lista && (*lista)->info.posicion != posicion_desde)
+        lista = &(*lista)->siguiente;
+    
+     char *aux = (char *)malloc(strlen(elemento)*sizeof(char)+1);
+     strcpy(aux, elemento);
+
+    (*lista)->info.elemento = (char *)realloc(aux, strlen(aux)*sizeof(char)+1);
+}
+
+
+void while_escribir_posicion(t_lista *lista, t_pila *pila, char *elemento){
+
+  while(cant_variables > 0){
+    escribir_posicion(lista, desapilar_FILTER(pila), elemento);
+    cant_variables--;
+  }
+}
+
+
 
 void avanzar(){
   
