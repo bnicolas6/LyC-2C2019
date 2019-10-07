@@ -294,7 +294,6 @@ filter : FILTER PAR_A {
 
                       } filter_lista_condicion {
                                                 filter_numero_variable_aux++; 
-                                                printf("VALOR: %d\n", filter_numero_variable_aux);
                                                 insertar_polaca(&lista, get_numero_variable_auxiliar("aux_", filter_numero_variable_aux));
                                                
                                                 insertar_polaca(&lista, "_");
@@ -374,7 +373,6 @@ filter_lista_variable :   filter_lista_variable SEPARADOR ID {
                                                               apilar_FILTER(&pila_FILTER_2);
                                                               insertar_espacio_polaca(&lista); 
                                                               avanzar();
-                                                              mostrar_polaca(&lista);
                                                              } 
                         | ID {   
 

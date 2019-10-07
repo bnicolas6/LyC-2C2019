@@ -1,0 +1,11 @@
+NOMBRE         		 TIPO           		 VALOR          	 LONGITUD       
+
+edad           		 FLOAT          		 -              	 -              
+peso           		 FLOAT          		 -              	 -              
+nombre         		 INT            		 -              	 -              
+v1             		 INT            		 -              	 -              
+v2             		 INT            		 -              	 -              
+v4             		 FLOAT          		 -              	 -              
+_5             		 CTE_INT        		 5              	 -              
+_15            		 CTE_INT        		 15             	 -              
+_3             		 CTE_INT        		 3              	 -              
