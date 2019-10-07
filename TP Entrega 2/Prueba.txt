@@ -7,21 +7,5 @@ VAR
 ENDVAR
 --/ Así son los comentarios en el 2°Cuat de LyC --/ Año 2019 /-- /--
 {
-	repeat{
-		if(v3 >= 5){
-			a = b + 3 * 4 + v1;
-		}
-		else{
-			if(v2 >= a || 3 > 3){
-				c = 100;
-			}
-			else{
-				repeat{
-					c = 4 + v1;
-				}
-				until(!(b > 5));
-			}
-		}
-	}
-	until(5 < c || v1 >= 4);
+	a = filter( _ > filter( _ > 14 , [b1, b2]) , [v1, v2]);
 }
