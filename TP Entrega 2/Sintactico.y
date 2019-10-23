@@ -272,13 +272,10 @@ filter_lista_variable :   filter_lista_variable SEPARADOR ID {
 								                        		insertar_polaca(&lista, $3);
 								                        		insertar_polaca(&lista, "=");
 								                        		insertar_polaca(&lista, "aux_2");
-								                        		//insertar_espacio_polaca(&lista);
-								                        		//agregar_salto(&lista, posicion_polaca++, posicion_polaca+3);
 								                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4));
 								                        		insertar_polaca(&lista, "=");
 								                        		insertar_polaca(&lista, "BI");
 								                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca));
-								                        		//auxiliar_posicion_polaca = desapilar_FILTER(&pila_FILTER_2); 
 															 }
                         | ID {
                         		filter_validarTipoVariable(yylval.strVal);
@@ -380,9 +377,16 @@ int main(int argc,char *argv[])
   	crear_lista(&lista);
     crear_pila_IF(&pila_IF);
     crear_pila_REPEAT(&pila_REPEAT);
+
     crear_pila_FILTER(&pila_FILTER_1);
     crear_pila_FILTER(&pila_FILTER_2);
     crear_pila_FILTER(&pila_FILTER_3);
+
+    /*
+		1er pila: Para el salto inicial.
+		2da pila: Para guardar el comienzo de la comparacion (se desapila y el mismo valor se usa tantas veces como variables tenga la lista).
+		3er pila: Para guardar la posicion que tendra el lugar a donde saltar si se cumple la condicion.
+    */
     crear_pila_INLIST(&pila_INLIST);
   }
   fclose(yyin);
