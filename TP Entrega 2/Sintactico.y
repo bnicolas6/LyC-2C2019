@@ -43,10 +43,13 @@ int variableActual=0;
 t_lista lista;
 t_pila pila_IF;
 t_pila pila_REPEAT;
-t_pila pila_FILTER;
+t_pila pila_FILTER_1;
+t_pila pila_FILTER_2;
+t_pila pila_FILTER_3;
 t_pila pila_INLIST;
 char tipo_salto[10];
 int posicion_polaca = 1;
+int auxiliar_posicion_polaca = 0;
 int condicion_AND = 0;
 
 /*FUNCIONES POLACA - PRINCIPALES*/
@@ -233,21 +236,65 @@ lectura : OP_LEC ID PUNTO_COMA ;
 
 
 
-filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+filter : FILTER { 
+					insertar_polaca(&lista, "BI");
+					apilar_FILTER(&pila_FILTER_1);
+                    insertar_espacio_polaca(&lista); 
+                    avanzar();
+                    apilar_FILTER(&pila_FILTER_2); 
+				} 
+				PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable  {
+																						insertar_polaca(&lista, "aux_1");
+														                        		insertar_polaca_int(&lista, 0);
+														                        		insertar_polaca(&lista, "=");
+														                        		agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+																					} COR_C PAR_C
 
 filter_lista_condicion :  filter_condicion OP_AND filter_condicion
                         | filter_condicion OP_OR filter_condicion
                         | OP_NOT PAR_A filter_condicion PAR_C
-                        | filter_condicion 
+                        | filter_condicion { 
+			                                insertar_polaca(&lista, "CMP"); 
+			                                insertar_polaca(&lista, invertir_salto(tipo_salto)); 
+			                                apilar_FILTER(&pila_FILTER_3);
+			                                insertar_espacio_polaca(&lista); 
+			                                avanzar(); 
+			                               } 
                         ;
 
-
-filter_condicion :    GUION_BAJO comparacion expresion
-                    | expresion comparacion GUION_BAJO
+filter_condicion :    GUION_BAJO { insertar_polaca(&lista, "aux_1"); } comparacion expresion
+                    | expresion comparacion GUION_BAJO { insertar_polaca(&lista, "aux_1"); }
                     ;
 
-filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipoVariable(yylval.strVal); }
-                        | ID {filter_validarTipoVariable(yylval.strVal); }
+filter_lista_variable :   filter_lista_variable SEPARADOR ID {
+																filter_validarTipoVariable(yylval.strVal);
+																insertar_polaca(&lista, "aux_1");
+								                        		insertar_polaca(&lista, $3);
+								                        		insertar_polaca(&lista, "=");
+								                        		insertar_polaca(&lista, "aux_2");
+								                        		//insertar_espacio_polaca(&lista);
+								                        		//agregar_salto(&lista, posicion_polaca++, posicion_polaca+3);
+								                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4));
+								                        		insertar_polaca(&lista, "=");
+								                        		insertar_polaca(&lista, "BI");
+								                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca));
+								                        		//auxiliar_posicion_polaca = desapilar_FILTER(&pila_FILTER_2); 
+															 }
+                        | ID {
+                        		filter_validarTipoVariable(yylval.strVal);
+                        		agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_1), posicion_polaca);
+                        		insertar_polaca(&lista, "BI");
+                        		insertar_polaca(&lista, "aux_2"); //DARLE VALOR: posicion_polaca o posicion_polaca+1 (fijarse)
+                        		insertar_polaca(&lista, "aux_1");
+                        		insertar_polaca(&lista, $1);
+                        		insertar_polaca(&lista, "=");
+                        		insertar_polaca(&lista, "aux_2");
+                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4));
+                        		insertar_polaca(&lista, "=");
+                        		insertar_polaca(&lista, "BI");
+                        		auxiliar_posicion_polaca = desapilar_FILTER(&pila_FILTER_2);
+                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca));
+                        	}
                         ;
 
 
@@ -333,7 +380,9 @@ int main(int argc,char *argv[])
   	crear_lista(&lista);
     crear_pila_IF(&pila_IF);
     crear_pila_REPEAT(&pila_REPEAT);
-    crear_pila_FILTER(&pila_FILTER);
+    crear_pila_FILTER(&pila_FILTER_1);
+    crear_pila_FILTER(&pila_FILTER_2);
+    crear_pila_FILTER(&pila_FILTER_3);
     crear_pila_INLIST(&pila_INLIST);
   }
   fclose(yyin);
@@ -442,7 +491,7 @@ char* integer_to_string(int x){
 
     char* buffer = malloc(sizeof(char) * sizeof(int) * 4 + 1);
     if (buffer)
-         sprintf(buffer, "%d", x);
+         sprintf(buffer, "POS_%d", x);
 
     return buffer;
 }
