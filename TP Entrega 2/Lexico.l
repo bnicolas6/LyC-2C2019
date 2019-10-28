@@ -223,6 +223,28 @@ int insertarCteStringEnTS(char *str)
 	return 1;
 }
 
+int insertarStringEnTS(char *nombre, char *valor){
+	char *nombre_aux = (char*) malloc(strlen(nombre)* sizeof(char) + 1);
+	char *valor_aux = (char*) malloc(strlen(valor)* sizeof(char) + 1);
+
+	if (!nombre_aux || !valor_aux)
+		exit(1);
+
+	*nombre_aux = '\0';
+	*valor_aux = '\0';
+
+
+	strcat(nombre_aux, "_");
+	strcat(nombre_aux, nombre);
+
+	char *longitud = (char*) malloc(10 * sizeof(char));
+	strcpy(valor_aux, valor);
+	itoa(strlen(valor_aux), longitud, 10);
+
+	insertarEnTS(nombre_aux, "CTE_STRING", valor_aux, longitud);
+	return 1;
+}
+
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud)
 {
 	if (noExisteEnTS(nombre)==-1)

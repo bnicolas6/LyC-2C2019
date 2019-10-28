@@ -52,6 +52,12 @@ int posicion_polaca = 1;
 int auxiliar_posicion_polaca = 0;
 int condicion_AND = 0;
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int numero_variable_auxiliar = 1;
+int variable_auxiliar = 0;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*FUNCIONES POLACA - PRINCIPALES*/
 
 void crear_lista (t_lista *lista);
@@ -67,7 +73,7 @@ void avanzar();
 
 void mostrar_polaca(t_lista *lista);
 void liberar_memoria(t_lista *lista);
-char *integer_to_string(int integer);
+char *integer_to_string(int integer, char *inicial);
 char *invertir_salto(char *salto);
 int decision_AND_detectada();
 
@@ -170,7 +176,7 @@ termino :   termino OP_MULT factor { insertar_polaca(&lista, "*"); }
 factor :    ID { insertar_polaca(&lista, $1); }
           | CTE_INT { insertar_polaca_int(&lista, $1); }
           | CTE_REAL { insertar_polaca_real(&lista, $1); }
-          | filter
+          | filter { insertar_polaca(&lista, integer_to_string(variable_auxiliar, "RTA")); }
           | PAR_A expresion PAR_C
           ;
 
@@ -237,17 +243,22 @@ lectura : OP_LEC ID PUNTO_COMA ;
 
 
 filter : FILTER { 
+					variable_auxiliar = numero_variable_auxiliar++;
 					insertar_polaca(&lista, "BI");
-					apilar_FILTER(&pila_FILTER_1);
-                    insertar_espacio_polaca(&lista); 
-                    avanzar();
+					insertar_polaca(&lista, integer_to_string(variable_auxiliar, "BR"));
+					//apilar_FILTER(&pila_FILTER_1);		
+                    //insertar_espacio_polaca(&lista); 
+                    //avanzar();
                     apilar_FILTER(&pila_FILTER_2); 
 				} 
 				PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable  {
-																						insertar_polaca(&lista, "aux_1");
+																						insertar_polaca(&lista, integer_to_string(variable_auxiliar, "RTA"));
 														                        		insertar_polaca_int(&lista, 0);
 														                        		insertar_polaca(&lista, "=");
+														                        		insertar_polaca(&lista, integer_to_string(variable_auxiliar, "BR"));
+														                        		insertar_polaca(&lista, integer_to_string(posicion_polaca, "POS"));
 														                        		agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+														                        		variable_auxiliar--;
 																					} COR_C PAR_C
 
 filter_lista_condicion :  filter_condicion OP_AND filter_condicion
@@ -262,35 +273,37 @@ filter_lista_condicion :  filter_condicion OP_AND filter_condicion
 			                               } 
                         ;
 
-filter_condicion :    GUION_BAJO { insertar_polaca(&lista, "aux_1"); } comparacion expresion
-                    | expresion comparacion GUION_BAJO { insertar_polaca(&lista, "aux_1"); }
+filter_condicion :    GUION_BAJO { insertar_polaca(&lista, integer_to_string(variable_auxiliar, "RTA")); } comparacion expresion
+                    | expresion comparacion GUION_BAJO { insertar_polaca(&lista, integer_to_string(variable_auxiliar, "RTA")); }
                     ;
 
 filter_lista_variable :   filter_lista_variable SEPARADOR ID {
 																filter_validarTipoVariable(yylval.strVal);
-																insertar_polaca(&lista, "aux_1");
+																insertar_polaca(&lista, integer_to_string(variable_auxiliar, "RTA"));
 								                        		insertar_polaca(&lista, $3);
 								                        		insertar_polaca(&lista, "=");
-								                        		insertar_polaca(&lista, "aux_2");
-								                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4));
+								                        		insertar_polaca(&lista, integer_to_string(variable_auxiliar, "AUX"));
+								                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4, "POS"));
 								                        		insertar_polaca(&lista, "=");
 								                        		insertar_polaca(&lista, "BI");
-								                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca));
+								                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca, "POS"));
 															 }
                         | ID {
                         		filter_validarTipoVariable(yylval.strVal);
-                        		agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_1), posicion_polaca);
+                        		//agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_1), posicion_polaca);
+                        		insertarStringEnTS(integer_to_string(variable_auxiliar, "BR"), integer_to_string(posicion_polaca, "POS"));
                         		insertar_polaca(&lista, "BI");
-                        		insertar_polaca(&lista, "aux_2"); //DARLE VALOR: posicion_polaca o posicion_polaca+1 (fijarse)
-                        		insertar_polaca(&lista, "aux_1");
+                        		insertar_polaca(&lista, integer_to_string(variable_auxiliar, "AUX")); //DARLE VALOR: posicion_polaca o posicion_polaca+1 (fijarse)
+                        		insertarStringEnTS(integer_to_string(variable_auxiliar, "AUX"), integer_to_string(posicion_polaca, "POS"));
+                        		insertar_polaca(&lista, integer_to_string(variable_auxiliar, "RTA"));
                         		insertar_polaca(&lista, $1);
                         		insertar_polaca(&lista, "=");
-                        		insertar_polaca(&lista, "aux_2");
-                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4));
+                        		insertar_polaca(&lista, integer_to_string(variable_auxiliar, "AUX"));
+                        		insertar_polaca(&lista, integer_to_string(posicion_polaca+4, "POS"));
                         		insertar_polaca(&lista, "=");
                         		insertar_polaca(&lista, "BI");
                         		auxiliar_posicion_polaca = desapilar_FILTER(&pila_FILTER_2);
-                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca));
+                        		insertar_polaca(&lista, integer_to_string(auxiliar_posicion_polaca, "POS"));
                         	}
                         ;
 
@@ -463,7 +476,7 @@ void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta){
     while(*lista && (*lista)->info.posicion != posicion_desde)
         lista = &(*lista)->siguiente;
 
-    (*lista)->info.elemento = integer_to_string(posicion_hasta);
+    (*lista)->info.elemento = integer_to_string(posicion_hasta, "POS");
 }
 
 void avanzar(){
@@ -491,14 +504,20 @@ void liberar_memoria(t_lista *lista){
     }
 }
 
-char* integer_to_string(int x){
+char* integer_to_string(int x, char *inicial){
 
-    char* buffer = malloc(sizeof(char) * sizeof(int) * 4 + 1);
-    if (buffer)
-         sprintf(buffer, "POS_%d", x);
+	char *aux = (char *)malloc(strlen(inicial)*sizeof(char));
+    char *buffer = malloc(sizeof(char) * sizeof(int) * 4 + 1);
+
+    if (buffer && aux){
+    	strcpy(aux, inicial);
+    	sprintf(buffer, "%s_%d", aux, x);
+    }
+         
 
     return buffer;
 }
+
 
 char *invertir_salto(char *salto){
   
