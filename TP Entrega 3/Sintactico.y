@@ -151,7 +151,7 @@ char *strVal;
 %token IF ELSE 
 %%
 
-start : declaracion programa { printf("ACA7\n"); guardar_polaca(&lista); printf("ACA8\n"); liberar_memoria(&lista); };
+start : declaracion programa { guardar_polaca(&lista); liberar_memoria(&lista); };
 
 declaracion : VAR_INI lista_sentencia_declaracion VAR_FIN ;
 
@@ -253,7 +253,6 @@ ciclo : REPEAT {apilar_REPEAT(&pila_REPEAT); inicio_repeat = 1; }
                                                                                           {
                                                                                             insertar_polaca(&lista, "BI");
                                                                                             insertar_polaca_int(&lista, desapilar_REPEAT(&pila_REPEAT));
-                                                                                            printf("Posicion: %d\n", posicion_polaca);
                                                                                             while(pila_INLIST_INCOND)
                                                                                             {
                                                                                               agregar_salto(&lista, desapilar_INLIST_INCOND(&pila_INLIST_INCOND), posicion_polaca); 
@@ -569,36 +568,20 @@ comparacion :   OP_MAYOR { strncpy(tipo_salto, "BLE", 10); }
               ;
 
 
-inlist : INLIST PAR_A ID { printf("ANTES DE COPIAR ID\n"); 
-                           id_Inlist = $3; 
-                           printf("COPIO ID: %s\n", id_Inlist);} PUNTO_COMA COR_A lista_expresiones COR_C PAR_C ;
+inlist : INLIST PAR_A ID { id_Inlist = $3; } PUNTO_COMA COR_A lista_expresiones COR_C PAR_C ;
 
 lista_expresiones :   lista_expresiones PUNTO_COMA expresion { insertar_polaca(&lista, id_Inlist);
-                                                               printf("%s\n", id_Inlist); 
                                                                insertar_polaca(&lista, "CMP");
-                                                               printf("CMP\n");
                                                                insertar_polaca(&lista, "BEQ");
-                                                               printf("BEQ\n");
                                                                apilar_INLIST(&pila_INLIST);
-                                                               printf("APILA\n");
-                                                               insertar_espacio_polaca(&lista);
-                                                               printf("INSERTA ESPACIO\n");  
-                                                               avanzar();
-                                                               printf("AVANZA\n");
-                                                               printf("LISTA_EXPRESIONES : LISTA_EXPRESIONES PUNTO_COMA EXPRESION\n");}
+                                                               insertar_espacio_polaca(&lista); 
+                                                               avanzar();}
                     | expresion { insertar_polaca(&lista, id_Inlist);
-                                  printf("%s\n", id_Inlist); 
                                   insertar_polaca(&lista, "CMP");
-                                  printf("CMP\n");
                                   insertar_polaca(&lista, "BEQ");
-                                  printf("BEQ\n");
                                   apilar_INLIST(&pila_INLIST);
-                                  printf("APILA\n");
                                   insertar_espacio_polaca(&lista);
-                                  printf("INSERTA ESPACIO\n"); 
-                                  avanzar();
-                                  printf("AVANZA\n");
-                                  printf("LISTA_EXPRESIONES : EXPRESION\n");}
+                                  avanzar();}
                     ;
 
 
@@ -701,15 +684,11 @@ void insertar_polaca(t_lista *lista, char *elemento){
 void guardar_polaca(t_lista *lista){
     
   FILE * file = fopen("intermedia.txt", "w");
-  //printf("ACA 1\n");
   if(file == NULL){
-      //printf("ACA 2\n");
       printf("(!) ERROR: No se pudo abrir el txt correspondiente al codigo intermedio\n");
   }
   else{
-      //printf("ACA 3\n");
       while(*lista){
-            printf("%s \n", (*lista)->info.elemento);
             fprintf(file, "%s ", (*lista)->info.elemento);
             lista = &(*lista)->siguiente;
       }
