@@ -1,0 +1,9 @@
+VAR
+	[int, int, int] : [a, b, c];
+ENDVAR
+{
+	if(c < a || a > b)
+	{
+		a = b;
+	}
+}

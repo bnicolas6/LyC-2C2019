@@ -1,0 +1,9 @@
+VAR
+	[int, float, string] : [a, b, c];
+ENDVAR
+{
+	b = 5.6;
+	c = "HOLA";
+	a = b;
+	b = c;
+}

@@ -1,0 +1,10 @@
+VAR
+	[int, int, int] : [a, b, c];
+ENDVAR
+{
+	repeat
+	{
+		a = b;
+	}
+	until(a > c);
+}

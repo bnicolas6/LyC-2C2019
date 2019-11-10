@@ -1,0 +1,13 @@
+VAR
+	[int, int, int] : [a, b, c];
+ENDVAR
+{
+	if(inlist(a;[2+1;12;b+c]))
+	{
+		a = b;
+	}
+	else
+	{
+		b = c;
+	}
+}
