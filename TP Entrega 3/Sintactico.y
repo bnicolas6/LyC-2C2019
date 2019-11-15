@@ -20,6 +20,13 @@ typedef struct s_nodo_lista{
 }
 t_nodo_lista;
 
+typedef struct s_nodo_lista_etiqueta{
+    
+    t_info info;
+    struct s_nodo_lista_etiqueta *siguiente;
+}
+t_nodo_lista_etiqueta;
+
 typedef struct s_nodo_pila{
     
     int posicion;
@@ -27,9 +34,17 @@ typedef struct s_nodo_pila{
 }
 t_nodo_pila;
 
+typedef struct s_nodo_pila_ASM{
+    
+    char *elemento;
+    struct s_nodo_pila_ASM *siguiente;
+}
+t_nodo_pila_ASM;
 
 typedef t_nodo_lista *t_lista;
 typedef t_nodo_pila *t_pila;
+typedef t_nodo_pila_ASM *t_pila_ASM;
+typedef t_nodo_lista_etiqueta *t_lista_etiqueta;
 
 
 FILE  *yyin;
@@ -41,11 +56,15 @@ int variableActual=0;
 
 
 t_lista lista;
+t_lista_etiqueta lista_etiqueta;
 t_pila pila_IF;
 t_pila pila_REPEAT;
-t_pila pila_FILTER;
+t_pila pila_FILTER_1;
+t_pila pila_FILTER_2;
+t_pila pila_FILTER_3;
 t_pila pila_INLIST;
 t_pila pila_INLIST_INCOND;
+t_pila_ASM pila_ASM;
 char tipo_salto[10];
 int posicion_polaca = 1;
 int condicion_AND = 0;
@@ -60,6 +79,9 @@ int tengo_inlist = 0;
 int tengo_cond_inlist = 0;
 int negacion_inlist = 0;
 int inicio_repeat = 0;
+int numero_variable_auxiliar = 1;
+int variable_auxiliar = 0;
+int auxiliar_posicion_polaca = 0;
 
 /*VALIDACIONES*/
 
@@ -81,10 +103,8 @@ void avanzar();
 
 void mostrar_polaca(t_lista *lista);
 void liberar_memoria(t_lista *lista);
-char *integer_to_string(int integer);
 char *invertir_salto(char *salto);
 int decision_AND_detectada();
-
 
 
 /*FUNCIONES PILA*/
@@ -124,6 +144,31 @@ void crear_pila_INLIST_INCOND(t_pila *pila);
 void apilar_INLIST_INCOND(t_pila *pila);
 int desapilar_INLIST_INCOND(t_pila *pila);
 
+/* CODIGO ASM */
+void insertar_cabezera_asm(FILE **pf_asm);
+void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta);
+void crear_pila_ASM(t_pila_ASM *pila);
+void apilar_ASM(t_pila_ASM *pila, char *elemento);
+char *desapilar_ASM(t_pila_ASM *pila);
+
+char *get_nombre_asm(char *elemento);
+char* generarAuxiliar(int x, char *inicial);
+
+void crear_lista_etiqueta (t_lista_etiqueta *lista_etiqueta);
+void insertar_lista_etiqueta(t_lista_etiqueta *lista_etiqueta, char* elemento, int posicion);
+void guardar_etiquetas(t_lista *lista, t_lista_etiqueta *lista_etiqueta);
+int existe_etiqueta(t_lista_etiqueta **lista_etiqueta, int posicion);
+
+int esOperador(char **elemento);
+int esAsignacion(char **elemento);
+int esComparacion(char **elemento);
+int esSalto(char **elemento);
+int esEtiqueta(char **elemento);
+int esRead(char **elemento);
+int esWrite(char **elemento);
+/* FIN CODIGO ASM*/
+
+
 %}
 
 %union {
@@ -151,7 +196,7 @@ char *strVal;
 %token IF ELSE 
 %%
 
-start : declaracion programa { guardar_polaca(&lista); liberar_memoria(&lista); };
+start : declaracion programa { guardar_polaca(&lista); guardar_etiquetas(&lista, &lista_etiqueta); generar_asm(&lista, &lista_etiqueta); liberar_memoria(&lista); };
 
 declaracion : VAR_INI lista_sentencia_declaracion VAR_FIN ;
 
@@ -358,33 +403,77 @@ decision :   IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C {
                                              }
            ;
 
-escritura :   OP_ESC ID PUNTO_COMA
-            | OP_ESC CTE_INT PUNTO_COMA
-            | OP_ESC CTE_REAL PUNTO_COMA
-            | OP_ESC CTE_STRING PUNTO_COMA
+escritura :   OP_ESC ID PUNTO_COMA { insertar_polaca(&lista, $2); insertar_polaca(&lista, "WRITE"); }
+            | OP_ESC CTE_INT PUNTO_COMA { insertar_polaca_int(&lista, $2); insertar_polaca(&lista, "WRITE"); }
+            | OP_ESC CTE_REAL PUNTO_COMA { insertar_polaca_real(&lista, $2); insertar_polaca(&lista, "WRITE"); }
+            | OP_ESC CTE_STRING PUNTO_COMA { insertar_polaca(&lista, $2); insertar_polaca(&lista, "WRITE"); }
             ;
 
 
-lectura : OP_LEC ID PUNTO_COMA ;
+lectura : OP_LEC ID PUNTO_COMA { insertar_polaca(&lista, $2); insertar_polaca(&lista, "READ"); } ;
 
 
 
 
-filter : FILTER PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable COR_C PAR_C
+filter : FILTER { 
+          variable_auxiliar = numero_variable_auxiliar++;
+          insertar_polaca(&lista, "BI");
+          insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "BR"));
+          apilar_FILTER(&pila_FILTER_2); 
+        } 
+        PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable  {
+                                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA"));
+                                                        insertar_polaca_int(&lista, 0);
+                                                        insertar_polaca(&lista, "=");
+                                                        insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "BR"));
+                                                        insertar_polaca(&lista, generarAuxiliar(posicion_polaca, "POS"));
+                                                        agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+                                                        variable_auxiliar--;
+                                          } COR_C PAR_C
 
 filter_lista_condicion :  filter_condicion OP_AND filter_condicion
                         | filter_condicion OP_OR filter_condicion
                         | OP_NOT PAR_A filter_condicion PAR_C
-                        | filter_condicion 
+                        | filter_condicion { 
+                                      insertar_polaca(&lista, "CMP"); 
+                                      insertar_polaca(&lista, invertir_salto(tipo_salto)); 
+                                      apilar_FILTER(&pila_FILTER_3);
+                                      insertar_espacio_polaca(&lista); 
+                                      avanzar(); 
+                                     } 
                         ;
 
-
-filter_condicion :    GUION_BAJO comparacion expresion
-                    | expresion comparacion GUION_BAJO
+filter_condicion :    GUION_BAJO { insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); } comparacion expresion
+                    | expresion comparacion GUION_BAJO { insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); }
                     ;
 
-filter_lista_variable :   filter_lista_variable SEPARADOR ID {filter_validarTipoVariable(yylval.strVal); }
-                        | ID {filter_validarTipoVariable(yylval.strVal); }
+filter_lista_variable :   filter_lista_variable SEPARADOR ID {
+                                            filter_validarTipoVariable(yylval.strVal);
+                                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA"));
+                                            insertar_polaca(&lista, $3);
+                                            insertar_polaca(&lista, "=");
+                                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "AUX"));
+                                            insertar_polaca(&lista, generarAuxiliar(posicion_polaca+4, "POS"));
+                                            insertar_polaca(&lista, "=");
+                                            insertar_polaca(&lista, "BI");
+                                            insertar_polaca(&lista, generarAuxiliar(auxiliar_posicion_polaca, "POS"));
+                               }
+                        | ID {
+                            filter_validarTipoVariable(yylval.strVal);
+                            insertarStringEnTS(generarAuxiliar(variable_auxiliar, "BR"), generarAuxiliar(posicion_polaca, "POS"));
+                            insertar_polaca(&lista, "BI");
+                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "AUX")); //DARLE VALOR: posicion_polaca o posicion_polaca+1 (fijarse)
+                            insertarStringEnTS(generarAuxiliar(variable_auxiliar, "AUX"), generarAuxiliar(posicion_polaca, "POS"));
+                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA"));
+                            insertar_polaca(&lista, $1);
+                            insertar_polaca(&lista, "=");
+                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "AUX"));
+                            insertar_polaca(&lista, generarAuxiliar(posicion_polaca+4, "POS"));
+                            insertar_polaca(&lista, "=");
+                            insertar_polaca(&lista, "BI");
+                            auxiliar_posicion_polaca = desapilar_FILTER(&pila_FILTER_2);
+                            insertar_polaca(&lista, generarAuxiliar(auxiliar_posicion_polaca, "POS"));
+                          }
                         ;
 
 
@@ -439,10 +528,6 @@ lista_condicion :   condicion { if(inicio_inlist == 0)
                                         tengo_inlist = 1;
                                         if (tengo_cond_inlist == 1)
                                         {
-                                          //if(pila_INLIST_INCOND && inicio_repeat == 0)
-                                          //{
-                                            //agregar_salto(&lista, desapilar_INLIST_INCOND(&pila_INLIST_INCOND), posicion_polaca+1);
-                                          //}
                                           tengo_cond_inlist = 0;
                                         }
                                         else
@@ -568,14 +653,16 @@ comparacion :   OP_MAYOR { strncpy(tipo_salto, "BLE", 10); }
               ;
 
 
-inlist : INLIST PAR_A ID { id_Inlist = $3; } PUNTO_COMA COR_A lista_expresiones COR_C PAR_C ;
+inlist : INLIST PAR_A ID { id_Inlist = $3; 
+                         } PUNTO_COMA COR_A lista_expresiones COR_C PAR_C ;
 
 lista_expresiones :   lista_expresiones PUNTO_COMA expresion { insertar_polaca(&lista, id_Inlist);
                                                                insertar_polaca(&lista, "CMP");
                                                                insertar_polaca(&lista, "BEQ");
                                                                apilar_INLIST(&pila_INLIST);
-                                                               insertar_espacio_polaca(&lista); 
-                                                               avanzar();}
+                                                               insertar_espacio_polaca(&lista);
+                                                               avanzar();
+                                                             }
                     | expresion { insertar_polaca(&lista, id_Inlist);
                                   insertar_polaca(&lista, "CMP");
                                   insertar_polaca(&lista, "BEQ");
@@ -594,14 +681,18 @@ int main(int argc,char *argv[])
   }
   else
   {
-	yyparse();
-  	guardarRenglonesEnTS();
-  	crear_lista(&lista);
+    yyparse();
+    guardarRenglonesEnTS();
+    crear_lista(&lista);
     crear_pila_IF(&pila_IF);
     crear_pila_REPEAT(&pila_REPEAT);
-    crear_pila_FILTER(&pila_FILTER);
+    crear_pila_FILTER(&pila_FILTER_1);
+    crear_pila_FILTER(&pila_FILTER_2);
+    crear_pila_FILTER(&pila_FILTER_3);
     crear_pila_INLIST(&pila_INLIST);
     crear_pila_INLIST_INCOND(&pila_INLIST_INCOND);
+    crear_pila_ASM(&pila_ASM);
+    crear_lista_etiqueta(&lista_etiqueta);
   }
   fclose(yyin);
   return 0;
@@ -670,7 +761,6 @@ void insertar_polaca(t_lista *lista, char *elemento){
         exit(1);
     }
 
-    //nuevo->info.elemento = elemento;
     strcpy(nuevo->info.elemento, elemento);
     nuevo->info.posicion = posicion_polaca++;
 
@@ -701,7 +791,7 @@ void agregar_salto(t_lista *lista, int posicion_desde, int posicion_hasta){
     while(*lista && (*lista)->info.posicion != posicion_desde)
         lista = &(*lista)->siguiente;
 
-    (*lista)->info.elemento = integer_to_string(posicion_hasta);
+    (*lista)->info.elemento = generarAuxiliar(posicion_hasta, "POS");
 }
 
 void avanzar(){
@@ -727,15 +817,6 @@ void liberar_memoria(t_lista *lista){
         free(aux->info.elemento);
         free(aux);
     }
-}
-
-char* integer_to_string(int x){
-
-    char* buffer = malloc(sizeof(char) * sizeof(int) * 4 + 1);
-    if (buffer)
-         sprintf(buffer, "%d", x);
-
-    return buffer;
 }
 
 char *invertir_salto(char *salto){
@@ -842,3 +923,416 @@ int desapilar_INLIST(t_pila *pila){ desapilar(pila); }
 void crear_pila_INLIST_INCOND(t_pila *pila){ crear_pila(pila); }
 void apilar_INLIST_INCOND(t_pila *pila){ apilar(pila); }
 int desapilar_INLIST_INCOND(t_pila *pila){ desapilar(pila); }
+
+/******************************************************************************/
+/******************************************************************************/
+
+/*FUNCIONES PARA ASM*/
+
+void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta){
+  /*Creacion del archivo ASM*/
+  FILE *pf_asm;
+  char *elemento_aux;
+  char *aux;
+  int contadorAux = 0;
+  int contadorElemento = 0;
+  char *salto;
+  int i;
+  int tipoDato;
+
+  if((pf_asm = fopen("Final.asm", "w")) == NULL)
+  {
+    printf("Error al generar el asembler \n");
+    exit(1);
+  }
+
+  insertar_cabezera_asm(&pf_asm);
+
+  while(*lista){
+
+    contadorElemento++;
+    if(*lista_etiqueta && (*lista_etiqueta)->info.posicion == contadorElemento)
+    {
+      printf("%d \n", contadorElemento);
+      fprintf(pf_asm, "%s: \n", (*lista_etiqueta)->info.elemento);
+      lista_etiqueta = &(*lista_etiqueta)->siguiente;
+    }
+
+    elemento_aux = (char *)malloc(strlen((*lista)->info.elemento)*sizeof(char));
+    strcpy(elemento_aux, (*lista)->info.elemento);
+
+    if(esOperador(&elemento_aux)){ //Si es  alguno de: {+,  -, *, /}
+      fprintf(pf_asm, "\t FILD %s \n", get_nombre_asm(desapilar_ASM(&pila_ASM)));
+      fprintf(pf_asm, "\t FILD %s \n", get_nombre_asm(desapilar_ASM(&pila_ASM)));
+      fprintf(pf_asm, "\t FXCH \n");
+      fprintf(pf_asm, "\t %s \n", elemento_aux);
+      fprintf(pf_asm, "\t FSTP %s \n", generarAuxiliar(++contadorAux, "@aux"));
+      apilar_ASM(&pila_ASM, generarAuxiliar(contadorAux, "@aux"));
+      insertarEnTS(generarAuxiliar(contadorAux, "@aux"), "-", "-", "-");
+    }
+    else if(esAsignacion(&elemento_aux)){  //Si es {=}
+      aux = (char *)malloc(30*sizeof(char));
+      strcpy(aux, get_nombre_asm(desapilar_ASM(&pila_ASM)));
+      fprintf(pf_asm, "\t FILD %s \n", get_nombre_asm(desapilar_ASM(&pila_ASM)));
+      fprintf(pf_asm, "\t FSTP %s \n", aux);
+    }
+    else if(esComparacion(&elemento_aux)){ //Si es: {CMP}
+      fprintf(pf_asm, "\t FILD %s \n", get_nombre_asm(desapilar_ASM(&pila_ASM)));
+      fprintf(pf_asm, "\t FILD %s \n", get_nombre_asm(desapilar_ASM(&pila_ASM)));
+      fprintf(pf_asm, "\t FXCH \n");
+      fprintf(pf_asm, "\t FCOM \n");
+      fprintf(pf_asm, "\t FSTSW AX \n");
+      fprintf(pf_asm, "\t SAHF \n");
+    }
+    else if(esSalto(&elemento_aux)){ //Si es  alguno de: {BGT, BLT, BGE, BLE, BI, BNE, BEQ}
+      salto = (char *)malloc(30*sizeof(char));
+      strcpy(salto, elemento_aux);
+    }
+    else if(esEtiqueta(&elemento_aux)){ //Si es POS_X, entra por aca
+      for(i = 0; i <= 3; i++)
+      {
+        strcpy(elemento_aux, elemento_aux + 1);
+      }
+      fprintf(pf_asm, "\t %s ETIQ_%s \n", salto, elemento_aux);
+    }
+    else if(esRead(&elemento_aux))
+    {
+      elemento_aux = desapilar_ASM(&pila_ASM);
+      tipoDato = getTipoDatoId(elemento_aux);
+      if((tipoDato == 1) || (tipoDato == 2))
+      {
+        fprintf(pf_asm, "\t GetFloat %s \n", get_nombre_asm(elemento_aux));
+      }
+      else if(tipoDato == 3)
+      {
+        fprintf(pf_asm, "\t GetString %s \n", get_nombre_asm(elemento_aux));
+      }
+    }
+    else if(esWrite(&elemento_aux))
+    {
+      elemento_aux = desapilar_ASM(&pila_ASM);
+      tipoDato = getTipoDatoId(elemento_aux);
+      if((tipoDato == 1) || (tipoDato == 2))
+      {
+        fprintf(pf_asm, "\t DisplayFloat %s,2 \n", get_nombre_asm(elemento_aux));
+      }
+      else if(tipoDato == 3)
+      {
+        fprintf(pf_asm, "\t DisplayString %s \n", get_nombre_asm(elemento_aux));
+      }
+    }
+    else{
+      apilar_ASM(&pila_ASM, elemento_aux); //Si es  un operando,  entra por aca
+    }
+
+    lista = &(*lista)->siguiente;
+  }
+
+  contadorElemento++;
+  if(*lista_etiqueta && (*lista_etiqueta)->info.posicion == contadorElemento)
+  {
+    printf("%d \n", contadorElemento);
+    fprintf(pf_asm, "%s: \n", (*lista_etiqueta)->info.elemento);
+    lista_etiqueta = &(*lista_etiqueta)->siguiente;
+  }
+
+  fclose(pf_asm);
+}
+
+int esOperador(char **elemento){
+
+  int resultado = 0;
+  char *aux;
+
+  if(strcmp(*elemento, "+")== 0)
+  {
+    aux = "FADD";
+    resultado = 1;
+  }
+  else if(strcmp(*elemento, "-")== 0)
+  {
+    aux = "FSUB";
+    resultado = 1;
+  }
+  else if(strcmp(*elemento, "*")== 0)
+  {
+    aux = "FMUL";
+    resultado = 1;
+  }
+  else if(strcmp(*elemento, "/")== 0)
+  {
+    aux = "FDIV";
+    resultado = 1;
+  }
+
+  if(resultado)
+  {
+   *elemento = (char *)malloc(sizeof(char));
+    strcpy(*elemento, aux);
+  }
+  
+  return resultado;
+}
+
+int esAsignacion(char **elemento){
+  
+  int resultado = 0;
+
+  if(!strcmp(*elemento, "=")){
+
+    *elemento = (char *)malloc(4*sizeof(char));
+    strcpy(*elemento, "MOV");
+    resultado = 1;
+  }
+
+  return resultado;
+}
+
+int esComparacion(char **elemento){
+    
+    int resultado = 0;
+
+  if(!strcmp(*elemento, "CMP")){
+
+    *elemento = (char *)malloc(5*sizeof(char));
+    strcpy(*elemento, "FCOMP");
+    resultado = 1;
+  }
+
+  return resultado;
+
+}
+
+int esSalto(char **elemento){
+  
+  int resultado = 0;
+  char *aux;
+
+  if(!strcmp(*elemento, "BNE")){
+
+    aux = "JNE";
+    resultado = 1;
+  }
+  else if(!strcmp(*elemento, "BEQ")){
+
+    aux = "JE";
+    resultado = 1;
+  }
+  else if(!strcmp(*elemento, "BGE")){
+
+    aux = "JNA";
+    resultado = 1;
+  }
+  else if(!strcmp(*elemento, "BGT")){
+
+    aux = "JNAE";
+    resultado = 1;
+  }
+  else if(!strcmp(*elemento, "BLE")){
+
+    aux = "JNB";
+    resultado = 1;
+  }
+  else if(!strcmp(*elemento, "BLT")){
+
+    aux = "JNBE";
+    resultado = 1;
+  }
+  else if(!strcmp(*elemento, "BI")){
+
+    aux = "JMP";
+    resultado = 1;
+  }
+
+
+  if(resultado){
+    *elemento = (char *)malloc(4*sizeof(char));
+    strcpy(*elemento, aux);
+  }
+
+  return resultado;
+}
+
+int esEtiqueta(char **elemento){
+  if (strstr(*elemento, "POS_") != NULL)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int esRead(char **elemento)
+{
+  if (strstr(*elemento, "READ") != NULL)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+int esWrite(char **elemento)
+{
+  if (strstr(*elemento, "WRITE") != NULL)
+  {
+    return 1;
+  }
+  return 0;
+}
+
+void insertar_cabezera_asm(FILE **pf_asm){
+
+    fprintf(*pf_asm, "include macros2.asm\n");
+    fprintf(*pf_asm, "include number.asm\n");
+    fprintf(*pf_asm, ".MODEL  LARGE \n");
+    fprintf(*pf_asm, ".386\n");
+    fprintf(*pf_asm, ".STACK 200h \n");
+
+    fprintf(*pf_asm, ".CODE \n");
+    fprintf(*pf_asm, "MAIN:\n");
+    fprintf(*pf_asm, "\n");
+
+    fprintf(*pf_asm, "\n");
+    fprintf(*pf_asm, "\t MOV AX,@DATA  ;inicializa el segmento de datos\n");
+    fprintf(*pf_asm, "\t MOV DS,AX \n");
+    fprintf(*pf_asm, "\t MOV ES,AX \n");
+    fprintf(*pf_asm, "\t FNINIT \n");;
+    fprintf(*pf_asm, "\n");
+}
+
+void crear_pila_ASM(t_pila_ASM *pila){ 
+
+  *pila = NULL;
+}
+
+void apilar_ASM(t_pila_ASM *pila, char *elemento){ 
+
+  t_nodo_pila_ASM *nuevo_nodo_pila = (t_nodo_pila_ASM *)malloc(sizeof (t_nodo_pila_ASM));
+  char *elemento_aux = (char *)malloc(strlen(elemento)*sizeof(char));
+
+  if(!nuevo_nodo_pila || !elemento_aux)
+      exit(1);
+
+  strcpy(elemento_aux, elemento);
+  nuevo_nodo_pila->elemento = elemento_aux;
+  nuevo_nodo_pila->siguiente = *pila;
+  *pila = nuevo_nodo_pila;
+ }
+
+
+
+char *desapilar_ASM(t_pila_ASM *pila){ 
+
+  t_nodo_pila_ASM *nodo_aux;
+  char *elemento_aux;
+
+  if (*pila == NULL)
+      exit(1);
+
+  nodo_aux = *pila;
+  elemento_aux = (char *)malloc(strlen(nodo_aux->elemento)*sizeof(char));
+  strcpy(elemento_aux, nodo_aux->elemento);
+
+  *pila = nodo_aux->siguiente;
+  free(nodo_aux);
+
+  return elemento_aux;
+ }
+
+char *get_nombre_asm(char *elemento){
+
+  if (strstr(elemento, "@") == NULL)
+  {
+    return (char*)buscar_enTS(elemento);
+  }
+  return elemento;
+
+}
+
+char* generarAuxiliar(int x, char *inicial){
+
+    char *aux = (char *)malloc(strlen(inicial)*sizeof(char));
+    char *buffer = malloc(sizeof(char) * sizeof(int) * 4 + 1);
+
+    if (buffer && aux){
+        strcpy(aux, inicial);
+        sprintf(buffer, "%s_%d", aux, x);
+    }
+         
+
+    return buffer;
+}
+   
+void crear_lista_etiqueta(t_lista_etiqueta *lista_etiqueta)
+{
+  *lista_etiqueta = NULL;
+}
+
+void insertar_lista_etiqueta(t_lista_etiqueta *lista_etiqueta, char *elemento, int posicion)
+{
+  t_nodo_lista_etiqueta *nuevo = (t_nodo_lista_etiqueta *)malloc(sizeof (t_nodo_lista_etiqueta));
+  if (!nuevo)
+    exit(1);
+
+  nuevo->info.elemento = (char *)malloc(strlen(elemento)*sizeof(char));
+  if(!nuevo->info.elemento){
+      exit(1);
+  }
+
+  strcpy(nuevo->info.elemento, elemento);
+  nuevo->info.posicion = posicion;
+
+  while (*lista_etiqueta)
+    lista_etiqueta = &(*lista_etiqueta)->siguiente;
+
+  *lista_etiqueta = nuevo;
+  nuevo->siguiente = NULL;
+}
+
+void guardar_etiquetas(t_lista *lista, t_lista_etiqueta *lista_etiqueta)
+{
+  char *aux;
+  char *toString;
+  int contadorEtiqueta = 0;
+  int i;
+  char *elemento_aux;
+  char *elemento_aux2;
+  int posicion;
+
+  while(*lista)
+    {
+      elemento_aux = (char *)malloc(strlen((*lista)->info.elemento)*sizeof(char));
+      elemento_aux2 = (char *)malloc(strlen((*lista)->info.elemento)*sizeof(char));
+      strcpy(elemento_aux, (*lista)->info.elemento);
+      strcpy(elemento_aux2, (*lista)->info.elemento);
+      if(esEtiqueta(&elemento_aux))
+      {
+        for(i = 0; i <= 3; i++)
+        {
+          strcpy(elemento_aux2, elemento_aux2 + 1);
+        }
+        contadorEtiqueta++;
+        aux = (char *)malloc(30*sizeof(char));
+        strcpy(aux, "ETIQ_");
+        strcat(aux, elemento_aux2);
+        posicion = atoi(elemento_aux2);     
+        if(existe_etiqueta(&lista_etiqueta, posicion) == 0)
+        {
+          insertar_lista_etiqueta(lista_etiqueta, aux, posicion);
+        }        
+      }
+      lista = &(*lista)->siguiente;
+    }
+}
+
+int existe_etiqueta(t_lista_etiqueta **lista_etiqueta, int posicion)
+{
+  while(**lista_etiqueta)
+  {
+    if((**lista_etiqueta)->info.posicion == posicion)
+    {
+      return 1; 
+    }
+    *lista_etiqueta = &(**lista_etiqueta)->siguiente;
+  }
+  return 0;
+}

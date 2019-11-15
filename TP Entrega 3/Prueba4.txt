@@ -1,9 +1,0 @@
-VAR
-	[int, float, string, string, float] : [a, b, c, d, e];
-ENDVAR
-{
-	c = "HOLA";
-	d = c;
-	a = 2;
-	e = b;
-}

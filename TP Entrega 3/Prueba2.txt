@@ -1,6 +1,0 @@
-VAR
-	[string] : [nombre];
-ENDVAR
-{
-	nombre = "Gabriel";
-}

@@ -40,12 +40,14 @@ int validarCteString(char *str);
 int insertarCteIntEnTS(int entero);
 int insertarCteRealEnTS(float flotante);
 int insertarCteStringEnTS(char *str);
+int insertarStringEnTS(char *nombre, char *valor);
 int insertarIDEnTS(char *id);
 
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud);
 int noExisteEnTS(char *nombre);
 int getTipoDatoId(char * nombre);
 void guardarRenglonesEnTS();
+char *buscar_enTS(char *elemento);
 
 void insertar_tipoDato(int tipo);
 void mostrar_tipoDato();
@@ -224,6 +226,28 @@ int insertarCteStringEnTS(char *str)
 	return 1;
 }
 
+int insertarStringEnTS(char *nombre, char *valor){
+    char *nombre_aux = (char*) malloc(strlen(nombre)* sizeof(char) + 1);
+    char *valor_aux = (char*) malloc(strlen(valor)* sizeof(char) + 1);
+
+    if (!nombre_aux || !valor_aux)
+        exit(1);
+
+    *nombre_aux = '\0';
+    *valor_aux = '\0';
+
+
+    strcat(nombre_aux, "_");
+    strcat(nombre_aux, nombre);
+
+    char *longitud = (char*) malloc(10 * sizeof(char));
+    strcpy(valor_aux, valor);
+    itoa(strlen(valor_aux), longitud, 10);
+
+    insertarEnTS(nombre_aux, "CTE_STRING", valor_aux, longitud);
+    return 1;
+}
+
 void insertarEnTS(char *nombre, char *tipo, char *valor, char *longitud)
 {
 	if (noExisteEnTS(nombre)==-1)
@@ -359,4 +383,28 @@ int filter_validarTipoVariable(char *variable){
 				}
 			}
 	}
+}
+
+char *buscar_enTS(char *elemento){
+
+	int i;
+	char *result;
+	for(i = 0; i < cantRenglonesTS;  i++)
+	{
+		if(strcmpi(elemento, tablaSimbolos[i].valor) == 0)
+		{
+			result = (char *)malloc((strlen(elemento)+2)*sizeof(char));
+			strcpy(result, "@");
+			strcat(result, "_");
+			strcat(result, elemento);
+		}
+		else if(strcmpi(elemento, tablaSimbolos[i].nombre) == 0)
+		{
+			result = (char *)malloc((strlen(tablaSimbolos[i].nombre)+2)*sizeof(char));
+			strcpy(result, "@");
+			strcat(result, "_");
+			strcat(result, tablaSimbolos[i].nombre);
+		}
+	}
+	return result;
 }
