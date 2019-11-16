@@ -41,10 +41,18 @@ typedef struct s_nodo_pila_ASM{
 }
 t_nodo_pila_ASM;
 
+typedef struct s_nodo_data{
+    
+    char *elemento;
+    struct s_nodo_data *siguiente;
+}
+t_nodo_lista_data;
+
 typedef t_nodo_lista *t_lista;
 typedef t_nodo_pila *t_pila;
 typedef t_nodo_pila_ASM *t_pila_ASM;
 typedef t_nodo_lista_etiqueta *t_lista_etiqueta;
+typedef t_nodo_lista_data *t_lista_data;
 
 
 FILE  *yyin;
@@ -57,6 +65,7 @@ int variableActual=0;
 
 t_lista lista;
 t_lista_etiqueta lista_etiqueta;
+t_lista_data lista_data;
 t_pila pila_IF;
 t_pila pila_REPEAT;
 t_pila pila_FILTER_1;
@@ -146,18 +155,21 @@ int desapilar_INLIST_INCOND(t_pila *pila);
 
 /* CODIGO ASM */
 void insertar_cabezera_asm(FILE **pf_asm);
-void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta);
+void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta, t_lista_data *lista_data);
 void crear_pila_ASM(t_pila_ASM *pila);
-void apilar_ASM(t_pila_ASM *pila, char *elemento);
+void apilar_ASM(t_pila_ASM *pila, char *elemento, t_lista_data *lista_data);
 char *desapilar_ASM(t_pila_ASM *pila);
 
 char *get_nombre_asm(char *elemento);
 char* generarAuxiliar(int x, char *inicial);
 
-void crear_lista_etiqueta (t_lista_etiqueta *lista_etiqueta);
+void crear_lista_etiqueta(t_lista_etiqueta *lista_etiqueta);
 void insertar_lista_etiqueta(t_lista_etiqueta *lista_etiqueta, char* elemento, int posicion);
 void guardar_etiquetas(t_lista *lista, t_lista_etiqueta *lista_etiqueta);
 int existe_etiqueta(t_lista_etiqueta **lista_etiqueta, int posicion);
+
+void crear_lista_data(t_lista_data *lista_data);
+void insertar_lista_data(t_lista_data *lista_data, char* elemento);
 
 int esOperador(char **elemento);
 int esAsignacion(char **elemento);
@@ -196,7 +208,7 @@ char *strVal;
 %token IF ELSE 
 %%
 
-start : declaracion programa { guardar_polaca(&lista); guardar_etiquetas(&lista, &lista_etiqueta); generar_asm(&lista, &lista_etiqueta); liberar_memoria(&lista); };
+start : declaracion programa { guardar_polaca(&lista); guardar_etiquetas(&lista, &lista_etiqueta); generar_asm(&lista, &lista_etiqueta, &lista_data); liberar_memoria(&lista); };
 
 declaracion : VAR_INI lista_sentencia_declaracion VAR_FIN ;
 
@@ -693,6 +705,7 @@ int main(int argc,char *argv[])
     crear_pila_INLIST_INCOND(&pila_INLIST_INCOND);
     crear_pila_ASM(&pila_ASM);
     crear_lista_etiqueta(&lista_etiqueta);
+    crear_lista_data(&lista_data);
   }
   fclose(yyin);
   return 0;
@@ -929,7 +942,7 @@ int desapilar_INLIST_INCOND(t_pila *pila){ desapilar(pila); }
 
 /*FUNCIONES PARA ASM*/
 
-void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta){
+void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta, t_lista_data *lista_data){
   /*Creacion del archivo ASM*/
   FILE *pf_asm;
   char *elemento_aux;
@@ -967,7 +980,7 @@ void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta){
       fprintf(pf_asm, "\t FXCH \n");
       fprintf(pf_asm, "\t %s \n", elemento_aux);
       fprintf(pf_asm, "\t FSTP %s \n", generarAuxiliar(++contadorAux, "@aux"));
-      apilar_ASM(&pila_ASM, generarAuxiliar(contadorAux, "@aux"));
+      apilar_ASM(&pila_ASM, generarAuxiliar(contadorAux, "@aux"), lista_data);
       insertarEnTS(generarAuxiliar(contadorAux, "@aux"), "-", "-", "-");
     }
     else if(esAsignacion(&elemento_aux)){  //Si es {=}
@@ -1022,7 +1035,7 @@ void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta){
       }
     }
     else{
-      apilar_ASM(&pila_ASM, elemento_aux); //Si es  un operando,  entra por aca
+      apilar_ASM(&pila_ASM, elemento_aux, lista_data); //Si es  un operando,  entra por aca
     }
 
     lista = &(*lista)->siguiente;
@@ -1034,6 +1047,24 @@ void generar_asm(t_lista *lista, t_lista_etiqueta *lista_etiqueta){
     printf("%d \n", contadorElemento);
     fprintf(pf_asm, "%s: \n", (*lista_etiqueta)->info.elemento);
     lista_etiqueta = &(*lista_etiqueta)->siguiente;
+  }
+
+  fprintf(pf_asm, "\n");
+  fprintf(pf_asm, ".DATA \n");
+  char* valor = (char *)malloc(30*sizeof(char));
+
+  while(*lista_data)
+  {
+    strcpy(valor, (char*)data_enTS((*lista_data)->elemento));
+    if(strcmpi(valor, "ID") == 0)
+    {
+      fprintf(pf_asm, "\t %s dd ?\n", get_nombre_asm((*lista_data)->elemento));
+    }
+    else
+    {
+      fprintf(pf_asm, "\t %s dd %s\n", get_nombre_asm((*lista_data)->elemento), valor);
+    }
+    lista_data = &(*lista_data)->siguiente;
   }
 
   fclose(pf_asm);
@@ -1204,7 +1235,7 @@ void crear_pila_ASM(t_pila_ASM *pila){
   *pila = NULL;
 }
 
-void apilar_ASM(t_pila_ASM *pila, char *elemento){ 
+void apilar_ASM(t_pila_ASM *pila, char *elemento, t_lista_data *lista_data){ 
 
   t_nodo_pila_ASM *nuevo_nodo_pila = (t_nodo_pila_ASM *)malloc(sizeof (t_nodo_pila_ASM));
   char *elemento_aux = (char *)malloc(strlen(elemento)*sizeof(char));
@@ -1216,9 +1247,21 @@ void apilar_ASM(t_pila_ASM *pila, char *elemento){
   nuevo_nodo_pila->elemento = elemento_aux;
   nuevo_nodo_pila->siguiente = *pila;
   *pila = nuevo_nodo_pila;
+
+  int existeElemento = 0;
+  while(*lista_data)
+  {
+    if(strcmpi((*lista_data)->elemento, elemento_aux) == 0)
+    {
+      existeElemento = 1;
+    }
+    lista_data = &(*lista_data)->siguiente;
+  }
+  if(existeElemento == 0)
+  {
+    insertar_lista_data(lista_data, elemento_aux);
+  }
  }
-
-
 
 char *desapilar_ASM(t_pila_ASM *pila){ 
 
@@ -1335,4 +1378,29 @@ int existe_etiqueta(t_lista_etiqueta **lista_etiqueta, int posicion)
     *lista_etiqueta = &(**lista_etiqueta)->siguiente;
   }
   return 0;
+}
+
+void crear_lista_data(t_lista_data *lista_data)
+{
+  *lista_data = NULL;
+}
+
+void insertar_lista_data(t_lista_data *lista_data, char* elemento)
+{
+  t_nodo_lista_data *nuevo = (t_nodo_lista_data *)malloc(sizeof (t_nodo_lista_data));
+  if (!nuevo)
+    exit(1);
+
+  nuevo->elemento = (char *)malloc(strlen(elemento)*sizeof(char));
+  if(!nuevo->elemento){
+      exit(1);
+  }
+
+  strcpy(nuevo->elemento, elemento);
+
+  while (*lista_data)
+    lista_data = &(*lista_data)->siguiente;
+
+  *lista_data = nuevo;
+  nuevo->siguiente = NULL;
 }

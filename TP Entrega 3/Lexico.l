@@ -48,6 +48,7 @@ int noExisteEnTS(char *nombre);
 int getTipoDatoId(char * nombre);
 void guardarRenglonesEnTS();
 char *buscar_enTS(char *elemento);
+char *data_enTS(char *elemento);
 
 void insertar_tipoDato(int tipo);
 void mostrar_tipoDato();
@@ -402,9 +403,21 @@ char *buscar_enTS(char *elemento){
 		{
 			result = (char *)malloc((strlen(tablaSimbolos[i].nombre)+2)*sizeof(char));
 			strcpy(result, "@");
-			strcat(result, "_");
 			strcat(result, tablaSimbolos[i].nombre);
 		}
 	}
 	return result;
+}
+
+char *data_enTS(char *elemento)
+{
+	int i;
+	for(i = 0; i < cantRenglonesTS;  i++)
+	{
+		if(strcmpi(elemento, tablaSimbolos[i].valor) == 0)
+		{
+			return tablaSimbolos[i].valor;
+		}
+	}
+	return "ID";
 }
