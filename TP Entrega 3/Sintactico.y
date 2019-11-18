@@ -442,12 +442,16 @@ filter : FILTER {
         PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable  {
                                                                               if(tengo_inlist == 0)
                                                                               {
-                                                                                insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); 
-                                                                                insertar_polaca_int(&lista, 0);
-                                                                                insertar_polaca(&lista, "=");
-
-
-                                                                                agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+	                                                                               insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); 
+	                                                                               insertar_polaca_int(&lista, 0);
+	                                                                               insertar_polaca(&lista, "=");
+	                                                                               agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+	                                                                               if(condicion_OR == 1)
+	                                                                               {
+	                                                                               	 agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+	                                                                               	 condicion_OR = 0;
+	                                                                               }
+                                                                                
 
 
                                                                                 insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "BR"));
@@ -556,8 +560,9 @@ filter_lista_condicion :  filter_condicion {
                           {
                             if(inicio_inlist == 0)
                             {
+                              condicion_OR = 1;
                               insertar_polaca(&lista, "CMP");
-                              insertar_polaca(&lista, tipo_salto);
+                              insertar_polaca(&lista, invertir_salto(tipo_salto));
                               apilar_FILTER(&pila_FILTER_3);
                               insertar_espacio_polaca(&lista);
                               avanzar();
@@ -582,7 +587,7 @@ filter_lista_condicion :  filter_condicion {
                             if(inicio_inlist == 0)
                             {
                               insertar_polaca(&lista, "CMP");
-                              insertar_polaca(&lista, tipo_salto);
+                              insertar_polaca(&lista, invertir_salto(tipo_salto));
                               apilar_FILTER(&pila_FILTER_3);
                               insertar_espacio_polaca(&lista); 
                               avanzar();
@@ -618,14 +623,29 @@ filter_lista_condicion :  filter_condicion {
                             } 
                           }
 
-                        | OP_NOT PAR_A filter_condicion PAR_C
-                        | filter_condicion { 
-                                      insertar_polaca(&lista, "CMP"); 
-                                      insertar_polaca(&lista, invertir_salto(tipo_salto));
-                                      apilar_FILTER(&pila_FILTER_3);
-                                      insertar_espacio_polaca(&lista); 
-                                      avanzar();
-                                     } 
+                        | OP_NOT PAR_A filter_condicion PAR_C { 
+			                                                    if(inicio_inlist == 0)
+			                                                    {
+			                                                      insertar_polaca(&lista, "CMP"); 
+			                                                      insertar_polaca(&lista, tipo_salto); 
+			                                                      apilar_FILTER(&pila_FILTER_3);
+			                                                      insertar_espacio_polaca(&lista); 
+			                                                      avanzar(); 
+			                                                    }
+			                                                    else
+			                                                    {
+			                                                      negacion_inlist = 1;
+			                                                      inicio_inlist = 0;
+			                                                      tengo_inlist = 1;
+			                                                    }
+			                                                  }
+                        | filter_condicion 	{ 
+		                                      insertar_polaca(&lista, "CMP"); 
+		                                      insertar_polaca(&lista, invertir_salto(tipo_salto));
+		                                      apilar_FILTER(&pila_FILTER_3);
+		                                      insertar_espacio_polaca(&lista); 
+		                                      avanzar();
+                                     		} 
                         ;
 
 filter_condicion :    GUION_BAJO { insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); } comparacion expresion
