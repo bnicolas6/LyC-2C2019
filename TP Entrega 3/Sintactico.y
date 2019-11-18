@@ -77,6 +77,7 @@ t_pila_ASM pila_ASM;
 char tipo_salto[10];
 int posicion_polaca = 1;
 int condicion_AND = 0;
+int condicion_OR = 0;
 int contar_variable = 0;
 int contar_tipo_dato = 0;
 int inicio_asignacion = 0;
@@ -208,7 +209,7 @@ char *strVal;
 %token IF ELSE 
 %%
 
-start : declaracion programa { guardar_polaca(&lista); guardar_etiquetas(&lista, &lista_etiqueta); generar_asm(&lista, &lista_etiqueta, &lista_data); liberar_memoria(&lista); };
+start : declaracion programa { guardar_polaca(&lista); guardar_etiquetas(&lista, &lista_etiqueta);  liberar_memoria(&lista); };
 
 declaracion : VAR_INI lista_sentencia_declaracion VAR_FIN ;
 
@@ -268,10 +269,15 @@ sentencia :   asignacion
             | lectura
             ;
 
-asignacion :   ID  OP_ASIG { inicio_asignacion = 1;
-                             tipo_dato_asignacion = getTipoDatoId($1);} expresion PUNTO_COMA { insertar_polaca(&lista, $1); 
-                                                                                               insertar_polaca(&lista, "=");
-                                                                                               inicio_asignacion = 0; }
+asignacion :   ID  OP_ASIG { 
+                             inicio_asignacion = 1;
+                             tipo_dato_asignacion = getTipoDatoId($1);              
+                           } 
+                             expresion PUNTO_COMA { 
+                                                    insertar_polaca(&lista, $1);                                     
+                                                    insertar_polaca(&lista, "=");
+                                                    inicio_asignacion = 0;
+                                                  }
              | ID  OP_ASIG CTE_STRING PUNTO_COMA { insertar_polaca(&lista, $3); 
                                                    insertar_polaca(&lista, $1); 
                                                    insertar_polaca(&lista, "=");
@@ -434,24 +440,191 @@ filter : FILTER {
           apilar_FILTER(&pila_FILTER_2); 
         } 
         PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable  {
-                                            insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA"));
-                                                        insertar_polaca_int(&lista, 0);
-                                                        insertar_polaca(&lista, "=");
-                                                        insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "BR"));
-                                                        insertar_polaca(&lista, generarAuxiliar(posicion_polaca, "POS"));
-                                                        agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
-                                                        variable_auxiliar--;
-                                          } COR_C PAR_C
+                                                                              if(tengo_inlist == 0)
+                                                                              {
+                                                                                insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); 
+                                                                                insertar_polaca_int(&lista, 0);
+                                                                                insertar_polaca(&lista, "=");
 
-filter_lista_condicion :  filter_condicion OP_AND filter_condicion
-                        | filter_condicion OP_OR filter_condicion
+
+                                                                                agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca);
+
+
+                                                                                insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "BR"));
+                                                                                insertar_polaca(&lista, generarAuxiliar(posicion_polaca+2, "POS"));
+                                                                                insertar_polaca(&lista, "=");
+                                                                                insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA"));                                                     
+                                                                                variable_auxiliar--;
+                                                                              }
+                                                                              else
+                                                                              {
+                                                                                if (negacion_inlist == 1)
+                                                                                {
+                                                                                  insertar_polaca(&lista, "BI");
+                                                                                  while(pila_INLIST)
+                                                                                  {
+                                                                                    agregar_salto(&lista, desapilar_INLIST(&pila_INLIST), posicion_polaca+1);
+                                                                                  }
+                                                                                  apilar_INLIST_INCOND(&pila_INLIST_INCOND);
+                                                                                  insertar_espacio_polaca(&lista);
+                                                                                  avanzar();
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    insertar_polaca(&lista, "BI");
+                                                                                    if(tengo_cond_inlist == 1)
+                                                                                    {
+                                                                                      agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca+1);
+                                                                                    }
+                                                                                    while(pila_INLIST_INCOND)
+                                                                                    {
+                                                                                      agregar_salto(&lista, desapilar_INLIST_INCOND(&pila_INLIST_INCOND), posicion_polaca+1);
+                                                                                    }
+                                                                                    apilar_INLIST_INCOND(&pila_INLIST_INCOND);
+                                                                                    insertar_espacio_polaca(&lista);
+                                                                                    avanzar(); 
+                                                                                }
+                                                                              }
+                                                                            } 
+                                                                              COR_C PAR_C
+
+filter_lista_condicion :  filter_condicion {
+                                              if(inicio_inlist == 0)
+                                              {
+                                                insertar_polaca(&lista, "CMP");
+                                                insertar_polaca(&lista, tipo_salto);
+                                                apilar_FILTER(&pila_FILTER_3);
+                                                insertar_espacio_polaca(&lista);
+                                                avanzar();
+                                              }
+                                              else
+                                              {
+                                                insertar_polaca(&lista, "BI");
+                                                while(pila_INLIST)
+                                                {
+                                                  agregar_salto(&lista, desapilar_INLIST(&pila_INLIST), posicion_polaca+1);
+                                                }
+                                                apilar_INLIST_INCOND(&pila_INLIST_INCOND);
+                                                insertar_espacio_polaca(&lista); 
+                                                avanzar();
+                                                inicio_inlist = 0;
+                                                tengo_inlist = 1;
+                                                tengo_cond_inlist = 1;
+                                              }
+                                           } 
+                                            OP_AND filter_condicion {
+                                                                      if(inicio_inlist == 0)
+                                                                      {
+                                                                        insertar_polaca(&lista, "CMP");
+                                                                        insertar_polaca(&lista, tipo_salto);
+                                                                        agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca+1); 
+                                                                        apilar_FILTER(&pila_FILTER_3);
+                                                                        insertar_espacio_polaca(&lista); 
+                                                                        avanzar();
+                                                                        if (tengo_inlist)
+                                                                        {
+                                                                          condicion_AND = 0;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                          condicion_AND = 1;
+                                                                        }  
+                                                                      }
+                                                                      else
+                                                                      {
+                                                                        insertar_polaca(&lista, "BI");
+                                                                        while(pila_INLIST)
+                                                                        {
+                                                                          agregar_salto(&lista, desapilar_INLIST(&pila_INLIST), posicion_polaca+1);
+                                                                        }
+                                                                        inicio_inlist = 0;
+                                                                        tengo_inlist = 1;
+                                                                        if (tengo_cond_inlist == 1)
+                                                                        {
+                                                                          tengo_cond_inlist = 0;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                          tengo_cond_inlist = 1;
+                                                                        }
+                                                                        apilar_INLIST_INCOND(&pila_INLIST_INCOND);
+                                                                        insertar_espacio_polaca(&lista); 
+                                                                        avanzar();
+                                                                      } 
+                                                                    }
+                        | filter_condicion 
+                          {
+                            if(inicio_inlist == 0)
+                            {
+                              insertar_polaca(&lista, "CMP");
+                              insertar_polaca(&lista, tipo_salto);
+                              apilar_FILTER(&pila_FILTER_3);
+                              insertar_espacio_polaca(&lista);
+                              avanzar();
+                            }
+                            else
+                            {
+                              insertar_polaca(&lista, "BI");
+                              while(pila_INLIST)
+                              {
+                                agregar_salto(&lista, desapilar_INLIST(&pila_INLIST), posicion_polaca+1);
+                              }
+                              apilar_INLIST_INCOND(&pila_INLIST_INCOND);
+                              insertar_espacio_polaca(&lista); 
+                              avanzar();
+                              inicio_inlist = 0;
+                              tengo_inlist = 1;
+                              tengo_cond_inlist = 1;
+                            }
+                          } 
+                          OP_OR filter_condicion 
+                          {
+                            if(inicio_inlist == 0)
+                            {
+                              insertar_polaca(&lista, "CMP");
+                              insertar_polaca(&lista, tipo_salto);
+                              apilar_FILTER(&pila_FILTER_3);
+                              insertar_espacio_polaca(&lista); 
+                              avanzar();
+                              if (tengo_inlist)
+                              {
+                                condicion_AND = 0;
+                              }
+                              else
+                              {
+                                condicion_AND = 1;
+                              }  
+                            }
+                            else
+                            {
+                              insertar_polaca(&lista, "BI");
+                              while(pila_INLIST)
+                              {
+                                agregar_salto(&lista, desapilar_INLIST(&pila_INLIST), posicion_polaca+1);
+                              }
+                              inicio_inlist = 0;
+                              tengo_inlist = 1;
+                              if (tengo_cond_inlist == 1)
+                              {
+                                tengo_cond_inlist = 0;
+                              }
+                              else
+                              {
+                                tengo_cond_inlist = 1;
+                              }
+                              apilar_INLIST_INCOND(&pila_INLIST_INCOND);
+                              insertar_espacio_polaca(&lista); 
+                              avanzar();
+                            } 
+                          }
+
                         | OP_NOT PAR_A filter_condicion PAR_C
                         | filter_condicion { 
                                       insertar_polaca(&lista, "CMP"); 
-                                      insertar_polaca(&lista, invertir_salto(tipo_salto)); 
+                                      insertar_polaca(&lista, invertir_salto(tipo_salto));
                                       apilar_FILTER(&pila_FILTER_3);
                                       insertar_espacio_polaca(&lista); 
-                                      avanzar(); 
+                                      avanzar();
                                      } 
                         ;
 
@@ -706,6 +879,7 @@ int main(int argc,char *argv[])
     crear_pila_ASM(&pila_ASM);
     crear_lista_etiqueta(&lista_etiqueta);
     crear_lista_data(&lista_data);
+
   }
   fclose(yyin);
   return 0;

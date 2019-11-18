@@ -1,0 +1,10 @@
+--/	Todas las variables deberán ser declaradas dentro de
+	un bloque especial para ese fin, delimitado por las
+	palabras reservadas VAR y ENDVAR /--
+VAR
+	[int, int, int, int] : [a, b, c, v1];
+ENDVAR
+--/ Así son los comentarios en el 2°Cuat de LyC --/ Año 2019 /-- /--
+{
+	a = 5 - filter(_ > 5 && v1 < _, [a, b, c]);
+}

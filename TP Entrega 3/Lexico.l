@@ -62,6 +62,8 @@ int sector_declaracion_almacenar_Id(char *id);
 
 int filter_validarTipoVariable(char *tipoDato);
 
+void mostrarTS();
+
 %}
 
 %option noyywrap
@@ -245,7 +247,7 @@ int insertarStringEnTS(char *nombre, char *valor){
     strcpy(valor_aux, valor);
     itoa(strlen(valor_aux), longitud, 10);
 
-    insertarEnTS(nombre_aux, "CTE_STRING", valor_aux, longitud);
+    insertarEnTS(nombre_aux, "STRING", valor_aux, longitud);
     return 1;
 }
 
@@ -420,4 +422,16 @@ char *data_enTS(char *elemento)
 		}
 	}
 	return "ID";
+}
+
+void mostrarTS()
+{
+	int i;
+
+	for (i = 0; i < 2; i++)
+	{
+		printf("%-15s\t\t %-15s\t\t %-15s\t %-15s\n", tablaSimbolos[i].nombre, tablaSimbolos[i].tipo, tablaSimbolos[i].valor, tablaSimbolos[i].longitud);
+	}
+
+
 }
