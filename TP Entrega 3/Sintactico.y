@@ -330,6 +330,7 @@ ciclo : REPEAT {apilar_REPEAT(&pila_REPEAT); inicio_repeat = 1; }
 
 
 decision :   IF PAR_A lista_condicion PAR_C LLAVE_A lista_sentencia LLAVE_C {
+																			  condicion_AND = 0;
                                                                               if(tengo_inlist == 0 || tengo_cond_inlist == 1)
                                                                               {
                                                                                 agregar_salto(&lista, desapilar_IF(&pila_IF), posicion_polaca);
@@ -442,6 +443,7 @@ filter : FILTER {
         PAR_A filter_lista_condicion SEPARADOR COR_A filter_lista_variable  {
                                                                               if(tengo_inlist == 0)
                                                                               {
+                                                                              	   condicion_AND = 0;
 	                                                                               insertar_polaca(&lista, generarAuxiliar(variable_auxiliar, "RTA")); 
 	                                                                               insertar_polaca_int(&lista, 0);
 	                                                                               insertar_polaca(&lista, "=");
@@ -520,7 +522,7 @@ filter_lista_condicion :  filter_condicion {
                                                                       if(inicio_inlist == 0)
                                                                       {
                                                                         insertar_polaca(&lista, "CMP");
-                                                                        insertar_polaca(&lista, tipo_salto);
+                                                                        insertar_polaca(&lista, invertir_salto(tipo_salto));
                                                                         agregar_salto(&lista, desapilar_FILTER(&pila_FILTER_3), posicion_polaca+1); 
                                                                         apilar_FILTER(&pila_FILTER_3);
                                                                         insertar_espacio_polaca(&lista); 
